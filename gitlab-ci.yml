@@ -1,0 +1,182 @@
+stages:
+  - build
+  - test
+  - code_quality
+  - deploy
+
+# Build Jobs
+build-apigateway:
+  stage: build
+  image: gradle:jdk21
+  tags:
+    - docker
+  script:
+    - ./gradlew :Apigateway:clean :Apigateway:build -x test
+    # Find and copy the JAR file (with more robust error handling)
+    - |
+      JAR_FILE=$(find Apigateway/build/libs -name "*.jar" -type f | head -n 1)
+      if [ -n "$JAR_FILE" ]; then
+        cp "$JAR_FILE" apigateway.jar
+      else
+        echo "No JAR file found in Apigateway/build/libs directory"
+        find Apigateway/build -name "*.jar" -type f  # List all JAR files to help debug
+        exit 1
+      fi
+  artifacts:
+    paths:
+      - apigateway.jar
+
+build-eventservice:
+  stage: build
+  image: gradle:jdk21
+  tags:
+    - docker
+  script:
+    - ./gradlew :EventService:clean :EventService:build -x test
+    # Find and copy the JAR file (with more robust error handling)
+    - |
+      JAR_FILE=$(find EventService/build/libs -name "*.jar" -type f | head -n 1)
+      if [ -n "$JAR_FILE" ]; then
+        cp "$JAR_FILE" eventservice.jar
+      else
+        echo "No JAR file found in EventService/build/libs directory"
+        find EventService/build -name "*.jar" -type f  # List all JAR files to help debug
+        exit 1
+      fi
+  artifacts:
+    paths:
+      - eventservice.jar
+
+build-userservice:
+  stage: build
+  image: gradle:jdk21
+  tags:
+    - docker
+  script:
+    - ./gradlew :UserService:clean :UserService:build -x test
+    # Find and copy the JAR file (with more robust error handling)
+    - |
+      JAR_FILE=$(find UserService/build/libs -name "*.jar" -type f | head -n 1)
+      if [ -n "$JAR_FILE" ]; then
+        cp "$JAR_FILE" userservice.jar
+      else
+        echo "No JAR file found in UserService/build/libs directory"
+        find UserService/build -name "*.jar" -type f  # List all JAR files to help debug
+        exit 1
+      fi
+  artifacts:
+    paths:
+      - userservice.jar
+
+# Test Jobs
+test-apigateway:
+  stage: test
+  image: gradle:jdk21
+  tags:
+    - docker
+  script:
+    - ./gradlew :Apigateway:test :Apigateway:jacocoTestReport  # Ensure JaCoCo report is generated
+  needs:
+    - build-apigateway
+  artifacts:
+    paths:
+      - Apigateway/build/test-results/test  # JUnit test results
+      - Apigateway/build/reports/jacoco/test/jacocoTestReport.xml  # JaCoCo coverage report
+
+test-eventservice:
+  stage: test
+  image: gradle:jdk21
+  tags:
+    - docker
+  script:
+    - ./gradlew :EventService:test :EventService:jacocoTestReport  # Ensure JaCoCo report is generated
+  needs:
+    - build-eventservice
+  artifacts:
+    paths:
+      - EventService/build/test-results/test  # JUnit test results
+      - EventService/build/reports/jacoco/test/jacocoTestReport.xml  # JaCoCo coverage report
+
+test-userservice:
+  stage: test
+  image: gradle:jdk21
+  tags:
+    - docker
+  script:
+    - ./gradlew :UserService:test :UserService:jacocoTestReport  # Ensure JaCoCo report is generated
+  needs:
+    - build-userservice
+  artifacts:
+    paths:
+      - UserService/build/test-results/test  # JUnit test results
+      - UserService/build/reports/jacoco/test/jacocoTestReport.xml  # JaCoCo coverage report
+
+# SonarQube Analysis
+sonarqube-check:
+  stage: code_quality
+  image: gradle:jdk21
+  tags:
+    - docker
+  before_script:
+    - chmod +x ./gradlew
+  script:
+    - echo "Running SonarQube Analysis for all subprojects"
+    - ./gradlew sonar -Dsonar.token=$SONAR_TOKEN --info > sonar.log 2>&1 || (cat sonar.log && exit 1)
+  artifacts:
+    paths:
+      - sonar.log  # Store the log file for debugging
+    expire_in: 1 week
+  needs:
+    - test-apigateway
+    - test-eventservice
+    - test-userservice
+  only:
+    - main
+    - dev
+    - master
+
+# Deploy Jobs
+deploy-apigateway:
+  stage: deploy
+  image: docker:latest
+  services:
+    - docker:dind
+  tags:
+    - docker
+  script:
+    - docker build --build-arg JAR_FILE=apigateway.jar -t my-apigateway:latest ./Apigateway
+    - docker run -d -p 8080:80 my-apigateway:latest
+  environment: production
+  needs:
+    - sonarqube-check
+  when: manual
+
+deploy-eventservice:
+  stage: deploy
+  image: docker:latest
+  services:
+    - docker:dind
+  tags:
+    - docker
+  script:
+    - docker build --build-arg JAR_FILE=eventservice.jar -t my-eventservice:latest ./EventService
+    - docker run -d -p 8081:80 my-eventservice:latest
+  environment: production
+  needs:
+    - sonarqube-check
+  when: manual
+
+deploy-userservice:
+  stage: deploy
+  image: docker:latest
+  services:
+    - docker:dind
+  tags:
+    - docker
+  script:
+    - docker build --build-arg JAR_FILE=userservice.jar -t my-userservice:latest ./UserService
+    - docker run -d -p 8082:80 my-userservice:latest
+  environment: production
+  needs:
+    - sonarqube-check
+  when: manual

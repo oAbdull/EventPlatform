@@ -1,0 +1,4 @@
+org.example.apigateway.ApigatewayApplication#main([Ljava/lang/String;)V
+false
+a319e923c4156e842a553f7e0b8dcea8
+org.springframework.boot.SpringApplication#run(Ljava/lang/Class;[Ljava/lang/String;)Lorg/springframework/context/ConfigurableApplicationContext;

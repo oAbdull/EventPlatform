@@ -1,0 +1,89 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.4.3'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id "org.sonarqube" version "6.0.1.5171"
+    id 'jacoco'  // Added for coverage reporting
+}
+
+group = 'org.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+configurations {
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    set('springCloudVersion', "2024.0.0")
+}
+
+dependencies {
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation 'org.springframework.cloud:spring-cloud-starter-gateway-mvc'
+    developmentOnly 'org.springframework.boot:spring-boot-docker-compose'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    testImplementation 'org.springframework.amqp:spring-rabbit-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    annotationProcessor 'org.projectlombok:lombok'
+    implementation 'org.projectlombok:lombok'
+    compileOnly 'org.projectlombok:lombok'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
+}
+
+sonar {
+    properties {
+
+        // SonarCloud-specific properties
+        property 'sonar.host.url', 'https://sonarcloud.io'
+        property 'sonar.organization', 'eventplatform'
+        property 'sonar.projectKey', "eventplatform_eventplatform_${project.name}"
+
+        // Source and test paths
+        property 'sonar.sources', 'src/main/java'  // Adjust if your source files are elsewhere
+        property 'sonar.tests', 'src/test/java'    // Adjust if your test files are elsewhere
+
+        // Binary and report paths
+        property 'sonar.java.binaries', 'build/classes/java/main'
+        property 'sonar.junit.reportPaths', 'build/test-results/test'
+        property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
+
+        // Additional SonarCloud settings
+        property 'sonar.scm.provider', 'git'
+        property 'sonar.qualitygate.wait', false
+        property 'sonar.token', System.getenv('SONAR_TOKEN') ?: ''  // Fallback to empty string if not set
+    }
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport  // Ensure JaCoCo report is generated after tests
+}
+
+jacocoTestReport {
+    reports {
+        xml.required = true  // SonarCloud requires XML format
+        xml.outputLocation = file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+    }
+}

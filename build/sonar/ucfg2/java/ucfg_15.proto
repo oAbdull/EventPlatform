@@ -1,0 +1,20 @@
+
+forg.example.userservice.config.RabbitMQConfig#exchange()Lorg/springframework/amqp/core/DirectExchange;‰
+C:/Users/MR.Abdullah/Desktop/EventPlatform/BackEnd/UserService/src/main/java/org/example/userservice/config/RabbitMQConfig.java (""1* 
+1" (1nl
+ (!2
+%0,org.springframework.amqp.core.DirectExchange",org.springframework.amqp.core.DirectExchangeÞ
+Û
+ (2
+%1"Horg.springframework.amqp.core.DirectExchange#<init>(Ljava/lang/String;)V*P
+
+__unknown_file (4
+2
+%0,org.springframework.amqp.core.DirectExchange*-
+
+__unknown_file (
+test.exchange"@
+ (34
+2
+%0,org.springframework.amqp.core.DirectExchangeB1/
+-org.example.userservice.config.RabbitMQConfigH

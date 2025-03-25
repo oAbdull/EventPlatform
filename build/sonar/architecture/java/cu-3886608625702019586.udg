@@ -1,0 +1,295 @@
+
+1.0eventplatform_eventplatformJavaFrontend"1742913409505*java2.B¨
+S
+NEventService/src/main/java/org/example/eventservice/config/RabbitMQConfig.java2
+
+package4
+$
+org.example.eventservice.config5
+3
+.org.example.eventservice.config.RabbitMQConfig7
+
+
+class8
+
+access9
+
+public10
+
+simple name11
+
+RabbitMQConfig12
+:
+4org.springframework.context.annotation.Configuration14
+
+unknown15
+
+annotated by16
+
+
+uses17
+a
+[org.example.eventservice.config.RabbitMQConfig#queue()Lorg/springframework/amqp/core/Queue;19
+
+method20
+
+queue21
+)
+#org.springframework.amqp.core.Queue23
+
+returns24
+1
++org.springframework.context.annotation.Bean26
+
+calls27
+f
+`org.example.eventservice.config.RabbitMQConfig#replyQueue()Lorg/springframework/amqp/core/Queue;29
+
+
+replyQueue30
+m
+gorg.example.eventservice.config.RabbitMQConfig#exchange()Lorg/springframework/amqp/core/DirectExchange;32
+
+exchange33
+2
+,org.springframework.amqp.core.DirectExchange35
+π
+≤org.example.eventservice.config.RabbitMQConfig#binding(Lorg/springframework/amqp/core/Queue;Lorg/springframework/amqp/core/DirectExchange;)Lorg/springframework/amqp/core/Binding;37
+
+binding38
++
+%org.springframework.amqp.core.Binding40
+
+	has param41
+
+is type42
+U
+Oorg.springframework.amqp.core.BindingBuilder$DirectExchangeRoutingKeyConfigurer44
+
+
+references45
+ñ
+èorg.springframework.amqp.core.BindingBuilder$DirectExchangeRoutingKeyConfigurer#with(Ljava/lang/String;)Lorg/springframework/amqp/core/Binding;47
+H
+Borg.springframework.amqp.core.BindingBuilder$DestinationConfigurer49
+Õ
+∆org.springframework.amqp.core.BindingBuilder$DestinationConfigurer#to(Lorg/springframework/amqp/core/DirectExchange;)Lorg/springframework/amqp/core/BindingBuilder$DirectExchangeRoutingKeyConfigurer;51
+2
+,org.springframework.amqp.core.BindingBuilder53
+£
+úorg.springframework.amqp.core.BindingBuilder#bind(Lorg/springframework/amqp/core/Queue;)Lorg/springframework/amqp/core/BindingBuilder$DestinationConfigurer;55J
+
+1
+12Z
+
+3	
+354jü
+
+34
+343515
+
+54
+545515
+@
+28:
+282920 *
+1 (26:3B
+	
+9
+10
+
+
+11
+30
+@
+18:
+181920 *
+1
+ 
+(26:3B
+	
+9
+10
+
+
+11
+21
+@
+36:
+363720 *
+1 (26:3B
+	
+9
+10
+
+
+11
+38
+
+13
+131415
+@
+31:
+313220 *
+1 (26:3B
+	
+9
+10
+
+
+11
+33
+
+52
+525315
+
+48
+484915
+
+22
+222315
+
+43
+434415
+
+50
+505115
+
+25
+252615
+
+39
+394015
+9
+64
+678 *
+1 (:3B
+	
+9
+10
+
+
+11
+12
+
+46
+464715rÂ
+
+61316*
+1 (
+
+61317*
+1 (
+
+182224*
+1 (
+
+182516*
+1
+ 
+(
+
+182517*
+1
+ 
+(
+
+
+182217*
+1 (
+
+182227*
+1 (
+
+282224*
+1 (
+
+282516*
+1 (
+
+282517*
+1 (
+
+
+282217*
+1 (
+
+282227*
+1 (
+
+313424*
+1 (
+
+312516*
+1 (
+
+312517*
+1 (
+
+
+313417*
+1 (
+
+313427*
+1 ("
+
+363924*
+1 (
+
+362241*
+1 (!
+
+363441*
+1) (7
+
+362516*
+1 (
+
+362517*
+1 (
+
+
+363917*
+1 (
+
+362242*
+1" ('
+
+362217*
+1 (!
+
+363442*
+18 (@
+
+363417*
+1) (7
+
+363924*
+1 (
+
+364345*
+1 (
+
+364627*
+18 (<
+
+364324*
+1 (
+
+364845*
+1 (
+
+365027*
+1+ (-
+
+364824*
+1 (
+
+365245*
+1 (
+
+365427*
+1 (#
+
+365217*
+1 (

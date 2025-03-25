@@ -1,0 +1,5 @@
+org.example.userservice.config.RabbitMQConfig#exchange()Lorg/springframework/amqp/core/DirectExchange;
+false
+4fea9c517de642444edabba3b26665c3
+org.springframework.amqp.core.DirectExchange#<init>(Ljava/lang/String;)V
+org.springframework.amqp.core.DirectExchange#instance-init#

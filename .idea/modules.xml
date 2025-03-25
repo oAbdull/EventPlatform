@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Apigateway/BackEnd.Apigateway.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Apigateway/BackEnd.Apigateway.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/EventService/BackEnd.EventService.main.iml" filepath="$PROJECT_DIR$/.idea/modules/EventService/BackEnd.EventService.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/UserService/BackEnd.UserService.main.iml" filepath="$PROJECT_DIR$/.idea/modules/UserService/BackEnd.UserService.main.iml" />
+    </modules>
+  </component>
+</project>

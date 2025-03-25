@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="org.example.apigateway.ApigatewayApplicationTests" tests="1" skipped="0" failures="0" errors="0" timestamp="2025-03-25T14:05:51.050Z" hostname="DESKTOP-K9H5JA1" time="0.542">
+  <properties/>
+  <testcase name="contextLoads()" classname="org.example.apigateway.ApigatewayApplicationTests" time="0.542"/>
+  <system-out><![CDATA[15:05:48.211 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [org.example.apigateway.ApigatewayApplicationTests]: ApigatewayApplicationTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+15:05:48.387 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration org.example.apigateway.ApigatewayApplication for test class org.example.apigateway.ApigatewayApplicationTests
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.3)
+
+2025-03-25T15:05:48.947+01:00  INFO 17548 --- [Apigateway] [    Test worker] o.e.a.ApigatewayApplicationTests         : Starting ApigatewayApplicationTests using Java 21.0.4 with PID 17548 (started by MR.Abdullah in C:\Users\MR.Abdullah\Desktop\EventPlatform\BackEnd\Apigateway)
+2025-03-25T15:05:48.948+01:00  INFO 17548 --- [Apigateway] [    Test worker] o.e.a.ApigatewayApplicationTests         : No active profile set, falling back to 1 default profile: "default"
+2025-03-25T15:05:49.870+01:00  INFO 17548 --- [Apigateway] [    Test worker] o.s.cloud.context.scope.GenericScope     : BeanFactory id=389ed4f9-bb93-3437-9d76-681b2bd34d31
+2025-03-25T15:05:50.620+01:00  INFO 17548 --- [Apigateway] [    Test worker] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [After]
+2025-03-25T15:05:50.620+01:00  INFO 17548 --- [Apigateway] [    Test worker] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Before]
+2025-03-25T15:05:50.620+01:00  INFO 17548 --- [Apigateway] [    Test worker] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Between]
+2025-03-25T15:05:50.620+01:00  INFO 17548 --- [Apigateway] [    Test worker] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Cookie]
+2025-03-25T15:05:50.620+01:00  INFO 17548 --- [Apigateway] [    Test worker] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Header]
+2025-03-25T15:05:50.620+01:00  INFO 17548 --- [Apigateway] [    Test worker] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Host]
+2025-03-25T15:05:50.620+01:00  INFO 17548 --- [Apigateway] [    Test worker] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Method]
+2025-03-25T15:05:50.620+01:00  INFO 17548 --- [Apigateway] [    Test worker] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Path]
+2025-03-25T15:05:50.620+01:00  INFO 17548 --- [Apigateway] [    Test worker] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Query]
+2025-03-25T15:05:50.620+01:00  INFO 17548 --- [Apigateway] [    Test worker] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [ReadBody]
+2025-03-25T15:05:50.636+01:00  INFO 17548 --- [Apigateway] [    Test worker] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [RemoteAddr]
+2025-03-25T15:05:50.636+01:00  INFO 17548 --- [Apigateway] [    Test worker] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [XForwardedRemoteAddr]
+2025-03-25T15:05:50.636+01:00  INFO 17548 --- [Apigateway] [    Test worker] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [Weight]
+2025-03-25T15:05:50.636+01:00  INFO 17548 --- [Apigateway] [    Test worker] o.s.c.g.r.RouteDefinitionRouteLocator    : Loaded RoutePredicateFactory [CloudFoundryRouteService]
+2025-03-25T15:05:51.059+01:00  INFO 17548 --- [Apigateway] [    Test worker] o.e.a.ApigatewayApplicationTests         : Started ApigatewayApplicationTests in 2.444 seconds (process running for 4.064)
+]]></system-out>
+  <system-err><![CDATA[Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of the JDK. Please add Mockito as an agent to your build what is described in Mockito's documentation: https://javadoc.io/doc/org.mockito/mockito-core/latest/org/mockito/Mockito.html#0.3
+WARNING: A Java agent has been loaded dynamically (C:\Users\MR.Abdullah\.gradle\caches\modules-2\files-2.1\net.bytebuddy\byte-buddy-agent\1.15.11\a38b16385e867f59a641330f0362ebe742788ed8\byte-buddy-agent-1.15.11.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+]]></system-err>
+</testsuite>

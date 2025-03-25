@@ -1,0 +1,4 @@
+org.example.eventservice.EventServiceApplication#main([Ljava/lang/String;)V
+false
+333f43092eef1643f036d94d3c107acc
+org.springframework.boot.SpringApplication#run(Ljava/lang/Class;[Ljava/lang/String;)Lorg/springframework/context/ConfigurableApplicationContext;

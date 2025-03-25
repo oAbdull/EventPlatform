@@ -1,0 +1,5 @@
+org.example.eventservice.service.EventService#processTestEvent()Ljava/lang/String;
+false
+79ccce079cf59cdcec0ba03a257206c8
+==
+convertSendAndReceive org.springframework.amqp.rabbit.core.RabbitTemplate#convertSendAndReceive(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;

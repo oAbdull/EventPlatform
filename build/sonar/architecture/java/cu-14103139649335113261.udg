@@ -1,0 +1,124 @@
+
+1.0eventplatform_eventplatformJavaFrontend"1742913410137*java2.Bæ
+R
+MUserService/src/main/java/org/example/userservice/UesrServiceApplication.java2
+
+package4
+
+org.example.userservice5
+3
+.org.example.userservice.UesrServiceApplication7
+
+
+class8
+
+access9
+
+public10
+
+simple name11
+
+UesrServiceApplication12
+=
+7org.springframework.amqp.rabbit.annotation.EnableRabbit14
+
+unknown15
+
+annotated by16
+
+
+uses17
+B
+<org.springframework.boot.autoconfigure.SpringBootApplication19
+O
+Iorg.example.userservice.UesrServiceApplication#main([Ljava/lang/String;)V21
+
+method22
+
+
+main23
+@
+:org.springframework.context.ConfigurableApplicationContext25
+
+returns26
+0
+*org.springframework.boot.SpringApplication28
+
+
+references29
+—
+org.springframework.boot.SpringApplication#run(Ljava/lang/Class;[Ljava/lang/String;)Lorg/springframework/context/ConfigurableApplicationContext;31
+
+calls32J
+
+1
+12Z
+
+3	
+354já
+
+13
+131415
+
+30
+303115
+
+27
+272815
+
+18
+181915
+9
+64
+678 *
+1	 	($:3B
+	
+9
+10
+
+
+11
+12
+@
+20:
+202122 *
+1
+ 
+(26:3B
+	
+9
+10
+
+
+11
+23
+
+24
+242515rî
+
+61316*
+1 (
+
+61317*
+1 (
+
+61816*
+1 (
+
+61817*
+1 (
+
+202426*
+1	 (
+
+202729*
+1	 (
+
+203032*
+1 (
+
+202717*
+1	 (
+
+20617*
+1 (5
