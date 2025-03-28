@@ -7,7 +7,8 @@ stages:
 # Build Jobs
 build-apigateway:
   stage: build
-  image: docker:latest
+  image: gradle:jdk21
+
   tags:
     - docker
   before_script:
@@ -30,7 +31,7 @@ build-apigateway:
 
 build-eventservice:
   stage: build
-  image: docker:latest
+  image:  gradle:jdk21
   tags:
     - docker
   before_script:
@@ -53,7 +54,7 @@ build-eventservice:
 
 build-userservice:
   stage: build
-  image: docker:latest
+  image: gradle:jdk21
   tags:
     - docker
   before_script:
@@ -77,7 +78,8 @@ build-userservice:
 # Test Jobs
 test-apigateway:
   stage: test
-  image: docker:latest
+  image: gradle:jdk21
+
   tags:
     - docker
   script:
@@ -91,7 +93,7 @@ test-apigateway:
 
 test-eventservice:
   stage: test
-  image: docker:latest
+  image: gradle:jdk21
   tags:
     - docker
   script:
@@ -105,7 +107,7 @@ test-eventservice:
 
 test-userservice:
   stage: test
-  image: docker:latest
+  image: gradle:jdk21
   tags:
     - docker
   script:
@@ -120,7 +122,7 @@ test-userservice:
 # SonarQube Analysis
 sonarqube-check:
   stage: code_quality
-  image: docker:latest
+  image: gradle:jdk21
   tags:
     - docker
   before_script:
