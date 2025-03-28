@@ -132,6 +132,7 @@ sonarqube-check:
   image: gradle:jdk21
   tags:
     - docker
+    - gradle
   before_script:
     - chmod +x ./gradlew
   script:
