@@ -55,26 +55,18 @@ dependencyManagement {
 
 sonar {
     properties {
-
         // SonarCloud-specific properties
         property 'sonar.host.url', 'https://sonarcloud.io'
         property 'sonar.organization', 'eventplatform'
-        property 'sonar.projectKey', "eventplatform_eventplatform_${project.name}"
-        property 'sonar.login', System.getenv('SONAR_TOKEN') ?: ''
-
-        // Source and test paths
-        property 'sonar.sources', 'src/main/java'  // Adjust if your source files are elsewhere
-        property 'sonar.tests', 'src/test/java'    // Adjust if your test files are elsewhere
-
-        // Binary and report paths
+        property 'sonar.projectKey', "eventplatform_eventplatform_${project.name.toLowerCase()}"
+        property 'sonar.token', System.getenv('SONAR_TOKEN') ?: ''
+        property 'sonar.sources', 'src/main/java'
+        property 'sonar.tests', 'src/test/java'
         property 'sonar.java.binaries', 'build/classes/java/main'
+
+        // Test and coverage reports
         property 'sonar.junit.reportPaths', 'build/test-results/test'
         property 'sonar.coverage.jacoco.xmlReportPaths', 'build/reports/jacoco/test/jacocoTestReport.xml'
-
-        // Additional SonarCloud settings
-        property 'sonar.scm.provider', 'git'
-        property 'sonar.qualitygate.wait', false
-        property 'sonar.login', System.getenv('SONAR_TOKEN') ?: ''  // Fallback to empty string if not set
     }
 }
 

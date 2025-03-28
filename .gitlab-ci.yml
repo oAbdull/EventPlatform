@@ -136,6 +136,9 @@ sonarqube-check:
     - chmod +x ./gradlew
   script:
     - echo "Running SonarQube Analysis for all services"
+    - - ./gradlew :Apigateway:build :EventService:build :UserService:build -x test
+    - ./gradlew :Apigateway:test :EventService:test :UserService:test
+
     - export SONAR_TOKEN="$SONAR_TOKEN"
     - ./gradlew sonar "-Dsonar.login=$SONAR_TOKEN"
   variables:
