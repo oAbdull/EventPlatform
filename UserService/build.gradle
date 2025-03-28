@@ -60,6 +60,7 @@ sonar {
         property 'sonar.host.url', 'https://sonarcloud.io'
         property 'sonar.organization', 'eventplatform'
         property 'sonar.projectKey', "eventplatform_eventplatform_${project.name}"
+        property 'sonar.login', System.getenv('SONAR_TOKEN') ?: ''
 
         // Source and test paths
         property 'sonar.sources', 'src/main/java'  // Adjust if your source files are elsewhere
@@ -73,7 +74,7 @@ sonar {
         // Additional SonarCloud settings
         property 'sonar.scm.provider', 'git'
         property 'sonar.qualitygate.wait', false
-        property 'sonar.token', System.getenv('SONAR_TOKEN') ?: ''  // Fallback to empty string if not set
+        property 'sonar.login', System.getenv('SONAR_TOKEN') ?: ''  // Fallback to empty string if not set
     }
 }
 

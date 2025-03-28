@@ -1,0 +1,90 @@
+
+1.0eventplatform_eventplatformJavaFrontend"1743151110642*java2.BÞ
+X
+SUserService/src/main/java/org/example/userservice/service/EventMessageConsumer.java2
+
+package4
+$
+org.example.userservice.service5
+9
+4org.example.userservice.service.EventMessageConsumer7
+
+
+class8
+
+access9
+
+public10
+
+simple name11
+
+EventMessageConsumer12
+.
+(org.springframework.stereotype.Component14
+
+unknown15
+
+annotated by16
+
+
+uses17
+t
+norg.example.userservice.service.EventMessageConsumer#processEventMessage(Ljava/lang/String;)Ljava/lang/String;19
+
+method20
+
+processEventMessage21
+?
+9org.springframework.amqp.rabbit.annotation.RabbitListener23J
+
+1
+12Z
+
+3	
+354j¥
+
+22
+222315
+
+13
+131415
+@
+18:
+181920 *
+1
+ 
+(26:3B
+	
+9
+10
+
+
+11
+21
+9
+64
+678 *
+1 (":3B
+	
+9
+10
+
+
+11
+12rj
+
+61316*
+1 (
+
+61317*
+1 (
+
+182216*
+1
+ 
+(
+
+182217*
+1
+ 
+(

@@ -1,5 +1,5 @@
 org.example.userservice.listener.UserMessageListener#handleMessage(Ljava/lang/String;)V
 false
-9768703141adb65fedc7ddfe6da0c922
+f6107089ff01d6dbc7ea687fe424de67
 ==
 println java.io.PrintStream#println(Ljava/lang/String;)V

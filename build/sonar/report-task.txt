@@ -1,7 +1,7 @@
 organization=eventplatform
 projectKey=eventplatform_eventplatform
 serverUrl=https://sonarcloud.io
-serverVersion=8.0.0.61049
+serverVersion=8.0.0.61173
 dashboardUrl=https://sonarcloud.io/dashboard?id=eventplatform_eventplatform
-ceTaskId=AZXNvB-GBh3gQLlpr1OK
-ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZXNvB-GBh3gQLlpr1OK
+ceTaskId=AZXb5yRFmJh7pOD7xB0d
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZXb5yRFmJh7pOD7xB0d

@@ -1,77 +1,0 @@
-
-1.0eventplatform_eventplatformJavaFrontend"1742913410305*java2.Bç
-O
-JUserService/src/main/java/org/example/userservice/repo/UserRepository.java2
-
-package4
-!
-org.example.userservice.repo5
-0
-+org.example.userservice.repo.UserRepository7
-
-	interface8
-
-access9
-
-public10
-
-simple name11
-
-UserRepository12
-A
-;org.springframework.data.mongodb.repository.MongoRepository14
-
-unknown15
-
-
-implements16
-/
-)org.springframework.stereotype.Repository18
-
-annotated by19
-
-
-uses20
-(
-"org.example.userservice.model.User22J
-
-1
-12Z
-
-3	
-354jw
-
-21
-212215
-9
-64
-678 *
-1 ( :3B
-	
-9
-10
-
-
-11
-12
-
-17
-171815
-
-13
-131415r‚
-
-61316*
-1) (8
-
-61719*
-1 (
-
-61720*
-1 (
-
-61320*
-1) (8
-
-62120*
-19 (=

@@ -1,6 +1,6 @@
 
 gorg.example.eventservice.config.RabbitMQConfig#exchange()Lorg/springframework/amqp/core/DirectExchange;å
-ÅC:/Users/MR.Abdullah/Desktop/EventPlatform/BackEnd/EventService/src/main/java/org/example/eventservice/config/RabbitMQConfig.java (""1*†
+ÅC:/Users/MR.Abdullah/Desktop/EventPlatform/Backend/EventService/src/main/java/org/example/eventservice/config/RabbitMQConfig.java (""1*†
 1" (1nl
  (!2
 %0,org.springframework.amqp.core.DirectExchange",org.springframework.amqp.core.DirectExchangeﬁ

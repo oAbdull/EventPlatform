@@ -1,6 +1,6 @@
 
 ±org.example.userservice.config.RabbitMQConfig#binding(Lorg/springframework/amqp/core/Queue;Lorg/springframework/amqp/core/DirectExchange;)Lorg/springframework/amqp/core/Binding;â
-C:/Users/MR.Abdullah/Desktop/EventPlatform/BackEnd/UserService/src/main/java/org/example/userservice/config/RabbitMQConfig.java ("startingBlock*ê
+C:/Users/MR.Abdullah/Desktop/EventPlatform/Backend/UserService/src/main/java/org/example/userservice/config/RabbitMQConfig.java ("startingBlock*ê
 startingBlock (Dº
 π
  (	

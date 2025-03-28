@@ -1,124 +1,0 @@
-
-1.0eventplatform_eventplatformJavaFrontend"1742913409612*java2.B‚
-V
-QEventService/src/main/java/org/example/eventservice/listener/MessageListener.java2
-
-package4
-&
-!org.example.eventservice.listener5
-6
-1org.example.eventservice.listener.MessageListener7
-
-
-class8
-
-access9
-
-public10
-
-simple name11
-
-MessageListener12
-.
-(org.springframework.stereotype.Component14
-
-unknown15
-
-annotated by16
-
-
-uses17
-€
-zorg.example.eventservice.listener.MessageListener#handleMessage(Lorg/springframework/amqp/core/Message;)Ljava/lang/String;19
-
-method20
-
-handleMessage21
-+
-%org.springframework.amqp.core.Message23
-
-	has param24
-?
-9org.springframework.amqp.rabbit.annotation.RabbitListener26
-
-is type27
-
-
-references28
-7
-1org.springframework.amqp.core.Message#getBody()[B30
-
-calls31J
-
-1
-12Z
-
-3	
-354jÍ
-9
-64
-678 *
-1 (:3B
-	
-9
-10
-
-
-11
-12
-
-25
-252615
-
-13
-131415
-
-29
-293015
-
-22
-222315
-@
-18:
-181920 *
-1
- 
-(26:3B
-	
-9
-10
-
-
-11
-21rñ
-
-61316*
-1 (
-
-61317*
-1 (
-
-182224*
-1! ((
-
-182516*
-1
- 
-(
-
-182517*
-1
- 
-(
-
-182227*
-1) (0
-
-182217*
-1! ((
-
-182228*
-1& (-
-
-182931*
-1. (5

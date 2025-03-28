@@ -1,6 +1,6 @@
 
 forg.example.userservice.config.RabbitMQConfig#exchange()Lorg/springframework/amqp/core/DirectExchange;‰
-C:/Users/MR.Abdullah/Desktop/EventPlatform/BackEnd/UserService/src/main/java/org/example/userservice/config/RabbitMQConfig.java (""1* 
+C:/Users/MR.Abdullah/Desktop/EventPlatform/Backend/UserService/src/main/java/org/example/userservice/config/RabbitMQConfig.java (""1* 
 1" (1nl
  (!2
 %0,org.springframework.amqp.core.DirectExchange",org.springframework.amqp.core.DirectExchangeÞ
