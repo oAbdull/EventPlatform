@@ -1,62 +1,0 @@
-
-Rorg.example.eventservice.service.EventService#processTestEvent()Ljava/lang/String;‹
-€C:/Users/MR.Abdullah/Desktop/EventPlatform/Backend/EventService/src/main/java/org/example/eventservice/service/EventService.java (""3*I
-2 (?":
- (@.,
-*No response received from messaging system*¢
-3 (@v
-t
- (A
-messagejava.lang.String"__id*E
-
-__unknown_file ()'
-%Test event message from Event Service±
-®
-# (19
-%03org.springframework.amqp.rabbit.core.RabbitTemplate"__id*a
-
-__unknown_file (E*C/
--org.example.eventservice.service.EventService"
-rabbitTemplateú÷
-# (	
-%1java.lang.Object"“org.springframework.amqp.rabbit.core.RabbitTemplate#convertSendAndReceive(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;*W
-
-__unknown_file (;
-9
-%03org.springframework.amqp.rabbit.core.RabbitTemplate*.
-
-__unknown_file (
-event-exchange**
-
-__unknown_file (
-
-event.test*9
-
-__unknown_file (
-
-messagejava.lang.String2MconvertSendAndReceive(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)f
-d
- (
-
-responsejava.lang.String"__id*4
-
-__unknown_file (
-
-%1java.lang.Objectz
-x
- (
-%2boolean"	__compare*
- (
-==**
- (
-
-responsejava.lang.String*
- (
-""*
-2
-1*9
-1 ("*
- (
-
-responsejava.lang.StringB1/
--org.example.eventservice.service.EventServiceH

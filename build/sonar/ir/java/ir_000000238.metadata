@@ -1,8 +1,0 @@
-org.example.eventservice.listener.MessageListener#handleMessage(Lorg/springframework/amqp/core/Message;)Ljava/lang/String;
-false
-ff42f50acd3988609aaab4fa09f616a0
-java.lang.String#<init>([B)V
-java.lang.String#instance-init#
-==
-getBody org.springframework.amqp.core.Message#getBody()[B
-println java.io.PrintStream#println(Ljava/lang/String;)V

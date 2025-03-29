@@ -1,6 +1,0 @@
-org.example.userservice.config.RabbitMQConfig#binding(Lorg/springframework/amqp/core/Queue;Lorg/springframework/amqp/core/DirectExchange;)Lorg/springframework/amqp/core/Binding;
-false
-97344ae42b1b61a122203de8e1ed68b6
-org.springframework.amqp.core.BindingBuilder#bind(Lorg/springframework/amqp/core/Queue;)Lorg/springframework/amqp/core/BindingBuilder$DestinationConfigurer;
-org.springframework.amqp.core.BindingBuilder$DestinationConfigurer#to(Lorg/springframework/amqp/core/DirectExchange;)Lorg/springframework/amqp/core/BindingBuilder$DirectExchangeRoutingKeyConfigurer;
-org.springframework.amqp.core.BindingBuilder$DirectExchangeRoutingKeyConfigurer#with(Ljava/lang/String;)Lorg/springframework/amqp/core/Binding;

@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfig {
 
     @Bean
-    public Queue queue() {
-        return new Queue("test.queue", false);
+    public Queue eventQueue() {
+        return new Queue("event.queue", false);
     }
 
     @Bean
@@ -19,11 +19,11 @@ public class RabbitMQConfig {
 
     @Bean
     public DirectExchange exchange() {
-        return new DirectExchange("test.exchange");
+        return new DirectExchange("event.exchange");
     }
 
     @Bean
-    public Binding binding(Queue queue, DirectExchange exchange) {
-        return BindingBuilder.bind(queue).to(exchange).with("test.routingkey");
+    public Binding binding(Queue eventQueue, DirectExchange exchange) {
+        return BindingBuilder.bind(eventQueue).to(exchange).with("event.routingkey");
     }
 }

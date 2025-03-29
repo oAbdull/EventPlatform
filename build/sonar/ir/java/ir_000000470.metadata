@@ -1,7 +1,0 @@
-org.example.userservice.controller.UserController#processTest()Ljava/lang/String;
-false
-89204302fecb6ca5a1bd39c9a6388fcd
-==
-convertSendAndReceive org.springframework.amqp.rabbit.core.RabbitTemplate#convertSendAndReceive(Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;
-info org.slf4j.Logger#info(Ljava/lang/String;Ljava/lang/Object;)V
-warn org.slf4j.Logger#warn(Ljava/lang/String;)V

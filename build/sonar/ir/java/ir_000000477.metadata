@@ -1,5 +1,0 @@
-org.example.userservice.config.RabbitMQConfig#eventQueue()Lorg/springframework/amqp/core/Queue;
-false
-84011cfdef658bf923c26961706cac66
-org.springframework.amqp.core.Queue#<init>(Ljava/lang/String;Z)V
-org.springframework.amqp.core.Queue#instance-init#

@@ -1,12 +1,13 @@
 package org.example.userservice.controller;
 
+import org.example.userservice.model.User;
+import org.example.userservice.service.UserServiceImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -15,20 +16,23 @@ public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
-    private RabbitTemplate rabbitTemplate;
+    private UserServiceImpl userService;
+
+    @PostMapping
+    public User createUser(@RequestBody User user) {
+        logger.info("Received request to create user: {}", user.getUsername());
+        return userService.createUser(user);
+    }
+
+    @GetMapping
+    public List<User> getAllUsers() {
+        logger.info("Received request to retrieve all users");
+        return userService.getAllUsers();
+    }
 
     @GetMapping("/test")
     public String processTest() {
-        // Send a message to RabbitMQ and wait for a reply
-        String message = "Hello from UserService";
-        logger.info("Sending message to RabbitMQ: {}", message);
-        String reply = (String) rabbitTemplate.convertSendAndReceive("test.exchange", "test.routingkey", message);
-        // Log the reply received from EventService
-        if (reply != null) {
-            logger.info("Received reply from EventService: {}", reply);
-        } else {
-            logger.warn("No reply received from EventService");
-        }
-        return reply != null ? reply : "No reply received";
+        logger.info("Processing test request");
+        return "UserService is up and running!";
     }
 }

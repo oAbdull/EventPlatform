@@ -1,4 +1,0 @@
-org.example.userservice.UesrServiceApplication#main([Ljava/lang/String;)V
-false
-8655d1cf8f5484c2f9707d2527e4f7f1
-org.springframework.boot.SpringApplication#run(Ljava/lang/Class;[Ljava/lang/String;)Lorg/springframework/context/ConfigurableApplicationContext;
