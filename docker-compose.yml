@@ -26,27 +26,14 @@ services:
       - mongodb
     environment:
       - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/userDB
-
-  eventservice:
-    build:
-      context: ./EventService
-    container_name: "eventservice"
-    ports:
-      - "8092:8082"
-    depends_on:
-      - rabbitmq
-      - mongodb
-    environment:
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/eventDB
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/usersDB
 
   apigateway:
     build:
       context: ./Apigateway
     container_name: "apigateway"
     ports:
-      - "8090:8080"
+      - "8080:8080"
     depends_on:
       - rabbitmq
       - eventservice
@@ -56,3 +43,18 @@ services:
       - USER_SERVICE_PORT=8081
       - EVENT_SERVICE_HOST=eventservice
       - EVENT_SERVICE_PORT=8082
+
+  eventservice:
+    build:
+      context: ./EventService
+    container_name: "eventservice"
+    ports:
+      - "8082:8082"
+    depends_on:
+      - rabbitmq
+      - mongodb
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/eventsDB
+
+

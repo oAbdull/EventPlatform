@@ -6,7 +6,7 @@ WORKDIR /app
 COPY . .
 
 # Build the JAR inside Docker
-RUN gradle clean build --no-daemon
+#RUN gradle clean build --no-daemon
 
 # Stage 2: Create a lightweight runtime image
 FROM openjdk:21-slim
