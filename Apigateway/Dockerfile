@@ -1,5 +1,5 @@
 # Stage 1: Build with Gradle inside Docker
-FROM gradle:8.4.0-jdk21 AS builder
+FROM gradle:8.4.0-jdk17 AS builder
 WORKDIR /app
 
 # Copy Gradle project files

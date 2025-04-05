@@ -1,3 +1,4 @@
+# docker-compose.yml
 services:
   rabbitmq:
     image: "rabbitmq:3-management"
@@ -8,12 +9,32 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mongodb:
-    image: "mongo"
+    image: "mongo:7.0"
     container_name: "mongodb"
     ports:
       - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
 
   userservice:
     build:
@@ -22,18 +43,19 @@ services:
     ports:
       - "8091:8081"
     depends_on:
-      - rabbitmq
-      - mongodb
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
     environment:
       - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/usersDB
-
+      - SPRING_DATA_MONGODB_URI=mongodb://admin:password@mongodb:27017/userDB?authSource=admin
   apigateway:
     build:
       context: ./Apigateway
     container_name: "apigateway"
     ports:
-      - "8080:8080"
+      - "8090:8080"
     depends_on:
       - rabbitmq
       - eventservice
@@ -49,12 +71,29 @@ services:
       context: ./EventService
     container_name: "eventservice"
     ports:
-      - "8082:8082"
+      - "8092:8082"
     depends_on:
-      - rabbitmq
-      - mongodb
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
     environment:
       - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/eventsDB
-
-
+      - SPRING_DATA_MONGODB_URI=mongodb://admin:password@mongodb:27017/eventDB?authSource=admin
+  ticketservice:
+    build:
+      context: ./TicketService
+    container_name: "ticketservice"
+    ports:
+      - "8093:8083"
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    environment:
+      - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_DATA_MONGODB_URI=mongodb://admin:password@mongodb:27017/ticketDB?authSource=admin
+volumes:
+  mongodb_data:
+    name: mongodb_data

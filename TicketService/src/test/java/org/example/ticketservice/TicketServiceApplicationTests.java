@@ -1,4 +1,4 @@
-package com.example.ticketservice;
+package org.example.ticketservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

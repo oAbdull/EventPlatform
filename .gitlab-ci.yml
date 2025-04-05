@@ -13,7 +13,7 @@ cache:
 # Build Jobs
 build-apigateway:
   stage: build
-  image: gradle:jdk21
+  image: gradle:jdk17
   tags:
     - docker
   before_script:
@@ -36,7 +36,7 @@ build-apigateway:
 
 build-eventservice:
   stage: build
-  image:  gradle:jdk21
+  image: gradle:jdk17
   tags:
     - docker
   before_script:
@@ -59,7 +59,7 @@ build-eventservice:
 
 build-userservice:
   stage: build
-  image: gradle:jdk21
+  image: gradle:jdk17
   tags:
     - docker
   before_script:
@@ -80,10 +80,33 @@ build-userservice:
     paths:
       - userservice.jar
 
+build-ticketservice:
+  stage: build
+  image: gradle:jdk17
+  tags:
+    - docker
+  before_script:
+    - chmod +x ./gradlew
+  script:
+    - ./gradlew :TicketService:clean :TicketService:build -x test
+    # Find and copy the JAR file (with more robust error handling)
+    - |
+      JAR_FILE=$(find TicketService/build/libs -name "*.jar" -type f | head -n 1)
+      if [ -n "$JAR_FILE" ]; then
+        cp "$JAR_FILE" ticketservice.jar
+      else
+        echo "No JAR file found in TicketService/build/libs directory"
+        find TicketService/build -name "*.jar" -type f  # List all JAR files to help debug
+        exit 1
+      fi
+  artifacts:
+    paths:
+      - ticketservice.jar
+
 # Test Jobs
 test-apigateway:
   stage: test
-  image: gradle:jdk21
+  image: gradle:jdk17
   tags:
     - docker
   script:
@@ -98,7 +121,7 @@ test-apigateway:
 
 test-eventservice:
   stage: test
-  image: gradle:jdk21
+  image: gradle:jdk17
   tags:
     - docker
   script:
@@ -113,7 +136,7 @@ test-eventservice:
 
 test-userservice:
   stage: test
-  image: gradle:jdk21
+  image: gradle:jdk17
   tags:
     - docker
   script:
@@ -126,10 +149,25 @@ test-userservice:
       - UserService/build/test-results/test  # JUnit test results
       - UserService/build/reports/jacoco/test/jacocoTestReport.xml  # JaCoCo coverage report
 
+test-ticketservice:
+  stage: test
+  image: gradle:jdk17
+  tags:
+    - docker
+  script:
+    - chmod +x ./gradlew  # Ensure script is executable in this job
+    - ./gradlew :TicketService:test :TicketService:jacocoTestReport  # Ensure JaCoCo report is generated
+  needs:
+    - build-ticketservice
+  artifacts:
+    paths:
+      - TicketService/build/test-results/test  # JUnit test results
+      - TicketService/build/reports/jacoco/test/jacocoTestReport.xml  # JaCoCo coverage report
+
 # SonarQube Analysis
 sonarqube-check:
   stage: code_quality
-  image: gradle:jdk21
+  image: gradle:jdk17
   tags:
     - docker
     - gradle
@@ -137,9 +175,8 @@ sonarqube-check:
     - chmod +x ./gradlew
   script:
     - echo "Running SonarQube Analysis for all services"
-    - - ./gradlew :Apigateway:build :EventService:build :UserService:build -x test
-    - ./gradlew :Apigateway:test :EventService:test :UserService:test
-
+    - ./gradlew :Apigateway:build :EventService:build :UserService:build :TicketService:build -x test
+    - ./gradlew :Apigateway:test :EventService:test :UserService:test :TicketService:test
     - export SONAR_TOKEN="$SONAR_TOKEN"
     - ./gradlew sonar "-Dsonar.login=$SONAR_TOKEN"
   variables:
@@ -149,6 +186,7 @@ sonarqube-check:
     - test-apigateway
     - test-eventservice
     - test-userservice
+    - test-ticketservice
   only:
     - main
     - dev
@@ -196,6 +234,21 @@ deploy-userservice:
   script:
     - docker build --build-arg JAR_FILE=userservice.jar -t my-userservice:latest ./UserService
     - docker run -d -p 8082:80 my-userservice:latest
+  environment: production
+  needs:
+    - sonarqube-check
+  when: manual
+
+deploy-ticketservice:
+  stage: deploy
+  image: docker:latest
+  services:
+    - docker:latest
+  tags:
+    - docker
+  script:
+    - docker build --build-arg JAR_FILE=ticketservice.jar -t my-ticketservice:latest ./TicketService
+    - docker run -d -p 8083:80 my-ticketservice:latest
   environment: production
   needs:
     - sonarqube-check

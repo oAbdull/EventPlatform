@@ -23,8 +23,8 @@ public class MessageListener {
         // Extract username from the message (e.g., "Create welcome event for user: username")
         String username = received.split("user: ")[1];
         // Create a welcome event
-        Event welcomeEvent = new Event(UUID.randomUUID().toString(), "Welcome Event for " + username, username);
-        eventRepository.save(welcomeEvent);
+       // Event welcomeEvent = new Event(UUID.randomUUID().toString(), "Welcome Event for " + username, username);
+      //  eventRepository.save(welcomeEvent);
 
         return "Created welcome event for user: " + username;
     }
