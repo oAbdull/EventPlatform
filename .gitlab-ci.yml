@@ -1,6 +1,7 @@
 stages:
   - build
   - test
+  - e2e_test  # Add new stage for E2E tests
   - code_quality
   - deploy
 
@@ -160,7 +161,96 @@ test-ticketservice:
       - TicketService/build/test-results/test
       - TicketService/build/reports/jacoco/test/jacocoTestReport.xml
 
-# SonarQube Analysis (No changes)
+# E2E Test Jobs (New)
+e2e-test-apigateway:
+  stage: e2e_test
+  image: cypress/included:13.14.2  # Using Cypress for E2E tests
+  tags:
+    - docker
+  before_script:
+    # Start all services using docker-compose
+    - docker-compose -f docker-compose.yml up -d
+    # Wait for services to be healthy
+    - sleep 30
+  script:
+    # Run E2E tests for Apigateway (assumes tests are in Apigateway/e2e/)
+    - cd Apigateway
+    - cypress run --spec "e2e/**/*.cy.js"
+  after_script:
+    # Stop and remove the containers
+    - docker-compose -f ../docker-compose.yml down
+  needs:
+    - test-apigateway
+  artifacts:
+    when: always
+    paths:
+      - Apigateway/cypress/videos/
+      - Apigateway/cypress/screenshots/
+
+e2e-test-eventservice:
+  stage: e2e_test
+  image: cypress/included:13.14.2
+  tags:
+    - docker
+  before_script:
+    - docker-compose -f docker-compose.yml up -d
+    - sleep 30
+  script:
+    - cd EventService
+    - cypress run --spec "e2e/**/*.cy.js"
+  after_script:
+    - docker-compose -f ../docker-compose.yml down
+  needs:
+    - test-eventservice
+  artifacts:
+    when: always
+    paths:
+      - EventService/cypress/videos/
+      - EventService/cypress/screenshots/
+
+e2e-test-userservice:
+  stage: e2e_test
+  image: cypress/included:13.14.2
+  tags:
+    - docker
+  before_script:
+    - docker-compose -f docker-compose.yml up -d
+    - sleep 30
+  script:
+    - cd UserService
+    - cypress run --spec "e2e/**/*.cy.js"
+  after_script:
+    - docker-compose -f ../docker-compose.yml down
+  needs:
+    - test-userservice
+  artifacts:
+    when: always
+    paths:
+      - UserService/cypress/videos/
+      - UserService/cypress/screenshots/
+
+e2e-test-ticketservice:
+  stage: e2e_test
+  image: cypress/included:13.14.2
+  tags:
+    - docker
+  before_script:
+    - docker-compose -f docker-compose.yml up -d
+    - sleep 30
+  script:
+    - cd TicketService
+    - cypress run --spec "e2e/**/*.cy.js"
+  after_script:
+    - docker-compose -f ../docker-compose.yml down
+  needs:
+    - test-ticketservice
+  artifacts:
+    when: always
+    paths:
+      - TicketService/cypress/videos/
+      - TicketService/cypress/screenshots/
+
+# SonarQube Analysis (Update needs to include E2E tests)
 sonarqube-check:
   stage: code_quality
   image: gradle:jdk17
@@ -179,17 +269,17 @@ sonarqube-check:
     SONAR_HOST_URL: "https://sonarcloud.io"
     SONAR_LOGIN: "$SONAR_TOKEN"
   needs:
-    - test-apigateway
-    - test-eventservice
-    - test-userservice
-    - test-ticketservice
+    - e2e-test-apigateway
+    - e2e-test-eventservice
+    - e2e-test-userservice
+    - e2e-test-ticketservice
   only:
     - main
     - dev
     - master
   allow_failure: true
 
-# Deploy Jobs (Updated to match variable names)
+# Deploy Jobs (No changes)
 deploy-apigateway:
   stage: deploy
   image: docker:latest
