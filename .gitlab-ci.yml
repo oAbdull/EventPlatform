@@ -164,20 +164,21 @@ test-ticketservice:
 # E2E Test Jobs (New)
 e2e-test-apigateway:
   stage: e2e_test
-  image: cypress/included:13.14.2  # Using Cypress for E2E tests
+  image: docker:24.0
+  services:
+    - docker:dind
   tags:
     - docker
   before_script:
-    # Start all services using docker-compose
+    - apk add --no-cache docker-compose
     - docker-compose -f docker-compose.yml up -d
-    # Wait for services to be healthy
-    - sleep 30
+    - sleep 60  # Increased wait time for all services to be healthy
   script:
-    # Run E2E tests for Apigateway (assumes tests are in Apigateway/e2e/)
     - cd Apigateway
-    - cypress run --spec "e2e/**/*.cy.js"
+    - apk add --no-cache nodejs npm
+    - npm install cypress --save-dev
+    - npx cypress run --spec "e2e/**/*.cy.js"
   after_script:
-    # Stop and remove the containers
     - docker-compose -f ../docker-compose.yml down
   needs:
     - test-apigateway
@@ -189,15 +190,20 @@ e2e-test-apigateway:
 
 e2e-test-eventservice:
   stage: e2e_test
-  image: cypress/included:13.14.2
+  image: docker:24.0
+  services:
+    - docker:dind
   tags:
     - docker
   before_script:
+    - apk add --no-cache docker-compose
     - docker-compose -f docker-compose.yml up -d
-    - sleep 30
+    - sleep 60
   script:
     - cd EventService
-    - cypress run --spec "e2e/**/*.cy.js"
+    - apk add --no-cache nodejs npm
+    - npm install cypress --save-dev
+    - npx cypress run --spec "e2e/**/*.cy.js"
   after_script:
     - docker-compose -f ../docker-compose.yml down
   needs:
@@ -210,15 +216,20 @@ e2e-test-eventservice:
 
 e2e-test-userservice:
   stage: e2e_test
-  image: cypress/included:13.14.2
+  image: docker:24.0
+  services:
+    - docker:dind
   tags:
     - docker
   before_script:
+    - apk add --no-cache docker-compose
     - docker-compose -f docker-compose.yml up -d
-    - sleep 30
+    - sleep 60
   script:
     - cd UserService
-    - cypress run --spec "e2e/**/*.cy.js"
+    - apk add --no-cache nodejs npm
+    - npm install cypress --save-dev
+    - npx cypress run --spec "e2e/**/*.cy.js"
   after_script:
     - docker-compose -f ../docker-compose.yml down
   needs:
@@ -231,15 +242,20 @@ e2e-test-userservice:
 
 e2e-test-ticketservice:
   stage: e2e_test
-  image: cypress/included:13.14.2
+  image: docker:24.0
+  services:
+    - docker:dind
   tags:
     - docker
   before_script:
+    - apk add --no-cache docker-compose
     - docker-compose -f docker-compose.yml up -d
-    - sleep 30
+    - sleep 60
   script:
     - cd TicketService
-    - cypress run --spec "e2e/**/*.cy.js"
+    - apk add --no-cache nodejs npm
+    - npm install cypress --save-dev
+    - npx cypress run --spec "e2e/**/*.cy.js"
   after_script:
     - docker-compose -f ../docker-compose.yml down
   needs:

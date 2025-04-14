@@ -8,6 +8,7 @@ services:
       - "8761:8761"
     networks:
       - microservices-network
+
   userservice:
     build:
       context: ./UserService
@@ -19,7 +20,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/usersdb
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      eureka.client.serviceUrl.defaultZone: http://host.docker.internal:8761/eureka
+      eureka.client.serviceUrl.defaultZone: http://eureka-server:8761/eureka
       SPRING_DOCKER_COMPOSE_ENABLED: "false"
       SPRING_RABBITMQ_HOST: rabbitmq
     networks:
@@ -37,7 +38,7 @@ services:
       - "8092:8082"
     environment:
       SPRING_DATA_MONGODB_URI: mongodb://admin:password@mongodb:27017/eventDB?authSource=admin
-      eureka.client.serviceUrl.defaultZone: http://host.docker.internal:8761/eureka
+      eureka.client.serviceUrl.defaultZone: http://eureka-server:8761/eureka
       SPRING_DOCKER_COMPOSE_ENABLED: "false"
       SPRING_RABBITMQ_HOST: rabbitmq
     networks:
@@ -57,7 +58,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ticketsdb
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      eureka.client.serviceUrl.defaultZone: http://host.docker.internal:8761/eureka
+      eureka.client.serviceUrl.defaultZone: http://eureka-server:8761/eureka
       SPRING_DOCKER_COMPOSE_ENABLED: "false"
       SPRING_RABBITMQ_HOST: rabbitmq
     networks:
@@ -75,7 +76,7 @@ services:
       - "8090:8080"
     environment:
       SPRING_DOCKER_COMPOSE_ENABLED: "false"
-      eureka.client.serviceUrl.defaultZone: http://host.docker.internal:8761/eureka
+      eureka.client.serviceUrl.defaultZone: http://eureka-server:8761/eureka
     networks:
       - microservices-network
 
@@ -88,8 +89,14 @@ services:
     ports:
       - '5432:5432'
     volumes:
-      - ./db:/var/lib/postgresql/data
+      - db-data:/var/lib/postgresql/data
       - ./create-db.sql:/docker-entrypoint-initdb.d/create_database.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
     networks:
       - microservices-network
 
@@ -126,6 +133,10 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: guest
       RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq-lib:/var/lib/rabbitmq
+      - rabbitmq-log:/var/log/rabbitmq
+      - rabbitmq_data:/var/lib/rabbitmq/mnesia
     healthcheck:
       test: ["CMD", "nc", "-z", "rabbitmq", "5672"]
       interval: 1m30s
