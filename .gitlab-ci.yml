@@ -10,7 +10,7 @@ cache:
   paths:
     - .gradle/
 
-# Build Jobs
+# Build Jobs (No changes)
 build-apigateway:
   stage: build
   image: gradle:jdk17
@@ -20,14 +20,13 @@ build-apigateway:
     - chmod +x ./gradlew
   script:
     - ./gradlew :Apigateway:clean :Apigateway:build -x test
-    # Find and copy the JAR file (with more robust error handling)
     - |
       JAR_FILE=$(find Apigateway/build/libs -name "*.jar" -type f | head -n 1)
       if [ -n "$JAR_FILE" ]; then
         cp "$JAR_FILE" apigateway.jar
       else
         echo "No JAR file found in Apigateway/build/libs directory"
-        find Apigateway/build -name "*.jar" -type f  # List all JAR files to help debug
+        find Apigateway/build -name "*.jar" -type f
         exit 1
       fi
   artifacts:
@@ -43,14 +42,13 @@ build-eventservice:
     - chmod +x ./gradlew
   script:
     - ./gradlew :EventService:clean :EventService:build -x test
-    # Find and copy the JAR file (with more robust error handling)
     - |
       JAR_FILE=$(find EventService/build/libs -name "*.jar" -type f | head -n 1)
       if [ -n "$JAR_FILE" ]; then
         cp "$JAR_FILE" eventservice.jar
       else
         echo "No JAR file found in EventService/build/libs directory"
-        find EventService/build -name "*.jar" -type f  # List all JAR files to help debug
+        find EventService/build -name "*.jar" -type f
         exit 1
       fi
   artifacts:
@@ -66,14 +64,13 @@ build-userservice:
     - chmod +x ./gradlew
   script:
     - ./gradlew :UserService:clean :UserService:build -x test
-    # Find and copy the JAR file (with more robust error handling)
     - |
       JAR_FILE=$(find UserService/build/libs -name "*.jar" -type f | head -n 1)
       if [ -n "$JAR_FILE" ]; then
         cp "$JAR_FILE" userservice.jar
       else
         echo "No JAR file found in UserService/build/libs directory"
-        find UserService/build -name "*.jar" -type f  # List all JAR files to help debug
+        find UserService/build -name "*.jar" -type f
         exit 1
       fi
   artifacts:
@@ -89,35 +86,34 @@ build-ticketservice:
     - chmod +x ./gradlew
   script:
     - ./gradlew :TicketService:clean :TicketService:build -x test
-    # Find and copy the JAR file (with more robust error handling)
     - |
       JAR_FILE=$(find TicketService/build/libs -name "*.jar" -type f | head -n 1)
       if [ -n "$JAR_FILE" ]; then
         cp "$JAR_FILE" ticketservice.jar
       else
         echo "No JAR file found in TicketService/build/libs directory"
-        find TicketService/build -name "*.jar" -type f  # List all JAR files to help debug
+        find TicketService/build -name "*.jar" -type f
         exit 1
       fi
   artifacts:
     paths:
       - ticketservice.jar
 
-# Test Jobs
+# Test Jobs (No changes)
 test-apigateway:
   stage: test
   image: gradle:jdk17
   tags:
     - docker
   script:
-    - chmod +x ./gradlew  # Ensure script is executable in this job
-    - ./gradlew :Apigateway:test :Apigateway:jacocoTestReport  # Ensure JaCoCo report is generated
+    - chmod +x ./gradlew
+    - ./gradlew :Apigateway:test :Apigateway:jacocoTestReport
   needs:
     - build-apigateway
   artifacts:
     paths:
-      - Apigateway/build/test-results/test  # JUnit test results
-      - Apigateway/build/reports/jacoco/test/jacocoTestReport.xml  # JaCoCo coverage report
+      - Apigateway/build/test-results/test
+      - Apigateway/build/reports/jacoco/test/jacocoTestReport.xml
 
 test-eventservice:
   stage: test
@@ -125,14 +121,14 @@ test-eventservice:
   tags:
     - docker
   script:
-    - chmod +x ./gradlew  # Ensure script is executable in this job
-    - ./gradlew :EventService:test :EventService:jacocoTestReport  # Ensure JaCoCo report is generated
+    - chmod +x ./gradlew
+    - ./gradlew :EventService:test :EventService:jacocoTestReport
   needs:
     - build-eventservice
   artifacts:
     paths:
-      - EventService/build/test-results/test  # JUnit test results
-      - EventService/build/reports/jacoco/test/jacocoTestReport.xml  # JaCoCo coverage report
+      - EventService/build/test-results/test
+      - EventService/build/reports/jacoco/test/jacocoTestReport.xml
 
 test-userservice:
   stage: test
@@ -140,14 +136,14 @@ test-userservice:
   tags:
     - docker
   script:
-    - chmod +x ./gradlew  # Ensure script is executable in this job
-    - ./gradlew :UserService:test :UserService:jacocoTestReport  # Ensure JaCoCo report is generated
+    - chmod +x ./gradlew
+    - ./gradlew :UserService:test :UserService:jacocoTestReport
   needs:
     - build-userservice
   artifacts:
     paths:
-      - UserService/build/test-results/test  # JUnit test results
-      - UserService/build/reports/jacoco/test/jacocoTestReport.xml  # JaCoCo coverage report
+      - UserService/build/test-results/test
+      - UserService/build/reports/jacoco/test/jacocoTestReport.xml
 
 test-ticketservice:
   stage: test
@@ -155,16 +151,16 @@ test-ticketservice:
   tags:
     - docker
   script:
-    - chmod +x ./gradlew  # Ensure script is executable in this job
-    - ./gradlew :TicketService:test :TicketService:jacocoTestReport  # Ensure JaCoCo report is generated
+    - chmod +x ./gradlew
+    - ./gradlew :TicketService:test :TicketService:jacocoTestReport
   needs:
     - build-ticketservice
   artifacts:
     paths:
-      - TicketService/build/test-results/test  # JUnit test results
-      - TicketService/build/reports/jacoco/test/jacocoTestReport.xml  # JaCoCo coverage report
+      - TicketService/build/test-results/test
+      - TicketService/build/reports/jacoco/test/jacocoTestReport.xml
 
-# SonarQube Analysis
+# SonarQube Analysis (No changes)
 sonarqube-check:
   stage: code_quality
   image: gradle:jdk17
@@ -191,19 +187,23 @@ sonarqube-check:
     - main
     - dev
     - master
-  allow_failure: true  # Temporarily allow failure until issues are resolved
+  allow_failure: true
 
-# Deploy Jobs
+# Deploy Jobs (Updated to match variable names)
 deploy-apigateway:
   stage: deploy
   image: docker:latest
   services:
-    - docker:latest
+    - docker:dind
   tags:
     - docker
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
   script:
-    - docker build --build-arg JAR_FILE=apigateway.jar -t my-apigateway:latest ./Apigateway
-    - docker run -d -p 8080:80 my-apigateway:latest
+    - docker build --build-arg JAR_FILE=apigateway.jar -t ${DOCKER_IMAGE_PREFIX}/apigateway:${CI_COMMIT_REF_SLUG} ./Apigateway
+    - docker push ${DOCKER_IMAGE_PREFIX}/apigateway:${CI_COMMIT_REF_SLUG}
+    - docker tag ${DOCKER_IMAGE_PREFIX}/apigateway:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/apigateway:latest
+    - docker push ${DOCKER_IMAGE_PREFIX}/apigateway:latest
   environment: production
   needs:
     - sonarqube-check
@@ -213,12 +213,16 @@ deploy-eventservice:
   stage: deploy
   image: docker:latest
   services:
-    - docker:latest
+    - docker:dind
   tags:
     - docker
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
   script:
-    - docker build --build-arg JAR_FILE=eventservice.jar -t my-eventservice:latest ./EventService
-    - docker run -d -p 8081:80 my-eventservice:latest
+    - docker build --build-arg JAR_FILE=eventservice.jar -t ${DOCKER_IMAGE_PREFIX}/eventservice:${CI_COMMIT_REF_SLUG} ./EventService
+    - docker push ${DOCKER_IMAGE_PREFIX}/eventservice:${CI_COMMIT_REF_SLUG}
+    - docker tag ${DOCKER_IMAGE_PREFIX}/eventservice:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/eventservice:latest
+    - docker push ${DOCKER_IMAGE_PREFIX}/eventservice:latest
   environment: production
   needs:
     - sonarqube-check
@@ -228,12 +232,16 @@ deploy-userservice:
   stage: deploy
   image: docker:latest
   services:
-    - docker:latest
+    - docker:dind
   tags:
     - docker
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
   script:
-    - docker build --build-arg JAR_FILE=userservice.jar -t my-userservice:latest ./UserService
-    - docker run -d -p 8082:80 my-userservice:latest
+    - docker build --build-arg JAR_FILE=userservice.jar -t ${DOCKER_IMAGE_PREFIX}/userservice:${CI_COMMIT_REF_SLUG} ./UserService
+    - docker push ${DOCKER_IMAGE_PREFIX}/userservice:${CI_COMMIT_REF_SLUG}
+    - docker tag ${DOCKER_IMAGE_PREFIX}/userservice:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/userservice:latest
+    - docker push ${DOCKER_IMAGE_PREFIX}/userservice:latest
   environment: production
   needs:
     - sonarqube-check
@@ -243,12 +251,16 @@ deploy-ticketservice:
   stage: deploy
   image: docker:latest
   services:
-    - docker:latest
+    - docker:dind
   tags:
     - docker
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
   script:
-    - docker build --build-arg JAR_FILE=ticketservice.jar -t my-ticketservice:latest ./TicketService
-    - docker run -d -p 8083:80 my-ticketservice:latest
+    - docker build --build-arg JAR_FILE=ticketservice.jar -t ${DOCKER_IMAGE_PREFIX}/ticketservice:${CI_COMMIT_REF_SLUG} ./TicketService
+    - docker push ${DOCKER_IMAGE_PREFIX}/ticketservice:${CI_COMMIT_REF_SLUG}
+    - docker tag ${DOCKER_IMAGE_PREFIX}/ticketservice:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/ticketservice:latest
+    - docker push ${DOCKER_IMAGE_PREFIX}/ticketservice:latest
   environment: production
   needs:
     - sonarqube-check
