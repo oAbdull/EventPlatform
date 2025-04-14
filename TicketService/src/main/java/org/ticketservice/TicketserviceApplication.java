@@ -1,14 +1,15 @@
-package org.example.ticketservice;
+package org.ticketservice;
 
-import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-@EnableRabbit
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+
 @SpringBootApplication
-public class TicketServiceApplication {
+@EnableDiscoveryClient
+public class TicketserviceApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(TicketServiceApplication.class, args);
+		SpringApplication.run(TicketserviceApplication.class, args);
 	}
 
 }

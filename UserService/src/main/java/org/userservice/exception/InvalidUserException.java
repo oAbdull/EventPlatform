@@ -1,4 +1,4 @@
-package org.example.userservice.exception;
+package org.userservice.exception;
 
 public class InvalidUserException extends Exception{
   public InvalidUserException() {

@@ -1,4 +1,4 @@
-package org.example.eventservice.config;
+package org.eventservice.config;
 
 import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;

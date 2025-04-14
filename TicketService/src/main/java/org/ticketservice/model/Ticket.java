@@ -1,27 +1,51 @@
-// TicketService/src/main/java/org/example/ticketservice/model/Ticket.java
-package org.example.ticketservice.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+package org.ticketservice.model;
 
-@Document(collection = "tickets")
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+
+import java.time.LocalDateTime;
+
+
+@Entity(name="tickets")
 public class Ticket {
     @Id
-    private String id;
-    private String eventId;
-    private int availableTickets;
-    private int bookedTickets;
-    private String bookedBy; // User ID of the user who booked the tickets
+    @GeneratedValue
+    private int id;
+    private String userid;
+    private String eventid;
+    private LocalDateTime bookingTime;
 
-    // Getters and setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    public String getEventId() { return eventId; }
-    public void setEventId(String eventId) { this.eventId = eventId; }
-    public int getAvailableTickets() { return availableTickets; }
-    public void setAvailableTickets(int availableTickets) { this.availableTickets = availableTickets; }
-    public int getBookedTickets() { return bookedTickets; }
-    public void setBookedTickets(int bookedTickets) { this.bookedTickets = bookedTickets; }
-    public String getBookedBy() { return bookedBy; }
-    public void setBookedBy(String bookedBy) { this.bookedBy = bookedBy; }
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getUserid() {
+        return userid;
+    }
+
+    public void setUserid(String userid) {
+        this.userid = userid;
+    }
+
+    public String getEventid() {
+        return eventid;
+    }
+
+    public void setEventid(String eventid) {
+        this.eventid = eventid;
+    }
+
+    public LocalDateTime getBookingTime() {
+        return bookingTime;
+    }
+
+    public void setBookingTime(LocalDateTime bookingTime) {
+        this.bookingTime = bookingTime;
+    }
 }

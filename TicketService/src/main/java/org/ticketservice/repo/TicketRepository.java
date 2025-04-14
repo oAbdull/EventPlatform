@@ -1,10 +1,12 @@
-package org.example.ticketservice.repo;
+package org.ticketservice.repo;
 
-import org.example.ticketservice.model.Ticket;
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.ticketservice.model.Ticket;
+import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface TicketRepository extends MongoRepository<Ticket, String> {
-    List<Ticket> findByEventId(String eventId);
+
+public interface TicketRepository extends JpaRepository<Ticket, Integer> {
+    List<Ticket> findByUserid(String userid);
+    List<Ticket> findByEventid(String eventid);
 }

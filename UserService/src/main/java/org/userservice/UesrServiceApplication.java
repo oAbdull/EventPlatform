@@ -1,4 +1,4 @@
-package org.example.userservice;
+package org.userservice;
 
 import org.springframework.amqp.rabbit.annotation.EnableRabbit;
 import org.springframework.boot.SpringApplication;

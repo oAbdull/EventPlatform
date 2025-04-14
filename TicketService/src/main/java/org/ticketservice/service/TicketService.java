@@ -1,58 +1,39 @@
-package org.example.ticketservice.service;
+package org.ticketservice.service;
 
-import org.example.ticketservice.dto.BookingRequest;
-import org.example.ticketservice.model.Ticket;
-import org.example.ticketservice.repo.TicketRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.ticketservice.model.Ticket;
+import org.ticketservice.repo.TicketRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
+
 @Service
-public class TicketService implements ITicketService {
+public class TicketService {
 
-    private static final Logger log = LoggerFactory.getLogger(TicketService.class);
+    @Autowired
+    private TicketRepository ticketRepository;
 
-    private final TicketRepository ticketRepository;
-
-    public TicketService(TicketRepository ticketRepository) {
-        this.ticketRepository = ticketRepository;
-    }
-
-    @Override
-    public Ticket bookTickets(String eventId, BookingRequest request) {
-        log.info("Booking {} tickets for eventId: {} by user: {}", request.getNumberOfTickets(), eventId, request.getUserId());
-        List<Ticket> tickets = ticketRepository.findByEventId(eventId);
-        if (tickets.isEmpty()) {
-            throw new RuntimeException("No tickets available for eventId: " + eventId);
-        }
-        Ticket ticket = tickets.get(0); // Assuming one ticket entry per event
-        if (ticket.getAvailableTickets() < request.getNumberOfTickets()) {
-            throw new RuntimeException("Not enough tickets available for eventId: " + eventId);
-        }
-
-        ticket.setAvailableTickets(ticket.getAvailableTickets() - request.getNumberOfTickets());
-        ticket.setBookedTickets(ticket.getBookedTickets() + request.getNumberOfTickets());
-        ticket.setBookedBy(request.getUserId());
+    public void bookTicket(Ticket ticket) {
+        ticket.setBookingTime(LocalDateTime.now());
         ticketRepository.save(ticket);
-        log.info("Booked {} tickets for eventId: {}. Remaining tickets: {}", request.getNumberOfTickets(), eventId, ticket.getAvailableTickets());
-        return ticket;
     }
 
-    @Override
+    public Ticket getTicket(int id) {
+        return ticketRepository.findById(id).orElse(null);
+    }
+
+    public void cancelTicket(int id) {
+        ticketRepository.deleteById(id);
+    }
+
+    public List<Ticket> getTicketsByUserId(String userId) {
+        return ticketRepository.findByUserid(userId);
+    }
+
     public List<Ticket> getTicketsByEventId(String eventId) {
-        log.info("Retrieving tickets for eventId: {}", eventId);
-        return ticketRepository.findByEventId(eventId);
+        return ticketRepository.findByEventid(eventId);
     }
 
-    @Override
-    public int getAvailableTickets(String eventId) {
-        log.info("Retrieving available tickets for eventId: {}", eventId);
-        List<Ticket> tickets = ticketRepository.findByEventId(eventId);
-        if (tickets.isEmpty()) {
-            return 0;
-        }
-        return tickets.get(0).getAvailableTickets();
-    }
 }

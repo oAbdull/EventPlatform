@@ -1,7 +1,4 @@
-package org.example.userservice.model;
-
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+package org.userservice.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;

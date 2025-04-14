@@ -1,23 +1,9 @@
-# TicketService/Dockerfile
-# Stage 1: Build with Gradle inside Docker
-FROM gradle:8.4.0-jdk17 AS builder
+FROM gradle:8.4.0-jdk17 as builder
 WORKDIR /app
-
-# Copy Gradle project files
 COPY . .
+RUN gradle build -x test --no-daemon
 
-# Build the JAR inside Docker
-RUN gradle bootJar --no-daemon
-
-# Stage 2: Create a lightweight runtime image
-FROM openjdk:21-slim
+FROM openjdk:17-slim
 WORKDIR /app
-
-# Copy the built JAR from the builder stage
 COPY --from=builder /app/build/libs/*.jar app.jar
-
-# Expose your service port
-EXPOSE 8083
-
-# Run the Spring Boot app
 ENTRYPOINT ["java", "-jar", "app.jar"]

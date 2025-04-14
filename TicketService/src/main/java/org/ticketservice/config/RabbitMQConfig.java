@@ -1,28 +1,52 @@
-package org.example.ticketservice.config;
+package org.ticketservice.config;
 
-import org.springframework.amqp.core.*;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.springframework.amqp.core.Binding;
+import org.springframework.amqp.core.BindingBuilder;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.support.converter.DefaultClassMapper;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
 
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String TICKET_QUEUE_NAME = "event.created.queue";
-    public static final String TICKET_EXCHANGE_NAME = "event.exchange";
-    public static final String TICKET_ROUTING_KEY = "event.created";
+    @Value("${rabbitmq.queue.name}")
+    private String QUEUE_NAME;
+
+    @Value("${rabbitmq.exchange.name}")
+    private String EXCHANGE_NAME;
+
+    @Value("${rabbitmq.routing.key}")
+    private String ROUTING_KEY;
 
     @Bean
-    public Queue ticketQueue() {
-        return new Queue(TICKET_QUEUE_NAME, true); // Declare the queue
+    public Queue queue() {
+        return new Queue(QUEUE_NAME, false);
     }
 
     @Bean
-    public TopicExchange ticketExchange() {
-        return new TopicExchange(TICKET_EXCHANGE_NAME);
+    public TopicExchange exchange() {
+        return new TopicExchange(EXCHANGE_NAME);
     }
 
     @Bean
-    public Binding ticketBinding(Queue ticketQueue, TopicExchange ticketExchange) {
-        return BindingBuilder.bind(ticketQueue).to(ticketExchange).with(TICKET_ROUTING_KEY);
+    public Binding binding(){
+        return BindingBuilder.bind(queue()).to(exchange()).with(ROUTING_KEY);
+    }
+
+    @Bean
+    public MessageConverter jsonToMapMessageConverter() {
+        ObjectMapper om = new ObjectMapper();
+        om.registerModule(new JavaTimeModule());
+        Jackson2JsonMessageConverter jackson2JsonMessageConverter = new Jackson2JsonMessageConverter(om);
+        return jackson2JsonMessageConverter;
     }
 }

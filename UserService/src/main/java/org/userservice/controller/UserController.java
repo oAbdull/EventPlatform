@@ -1,15 +1,13 @@
-package com.eventbooking.userservice.controllers;
+package org.userservice.controller;
 
 import org.userservice.dtos.LoginDto;
 import org.userservice.model.User;
 import org.userservice.service.UserService;
-import org.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.http.HttpResponse;
+
 import java.util.List;
 
 @RestController

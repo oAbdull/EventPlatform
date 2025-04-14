@@ -1,8 +1,8 @@
-package org.example.eventservice.controller;
+package org.eventservice.controller;
 
 
-import com.eventbooking.eventservice.models.Event;
-import com.eventbooking.eventservice.service.EventService;
+import org.eventservice.model.Event;
+import org.eventservice.service.EventService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

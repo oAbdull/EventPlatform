@@ -1,51 +1,91 @@
-package org.example.ticketservice.controller;
+package org.ticketservice.controller;
 
-import org.example.ticketservice.dto.BookingRequest;
-import org.example.ticketservice.model.Ticket;
-import org.example.ticketservice.service.ITicketService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
+import org.ticketservice.dtos.BookingDto;
+import org.ticketservice.model.Booking;
+import org.ticketservice.model.Ticket;
+import org.ticketservice.service.PublisherService;
+import org.ticketservice.service.TicketService;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/tickets")
 public class TicketController {
 
-    private static final Logger log = LoggerFactory.getLogger(TicketController.class);
+    @Autowired
+    private TicketService ticketService;
+    @Autowired
+    private PublisherService publisherService;
 
-    private final ITicketService ticketService;
-
-    public TicketController(ITicketService ticketService) {
-        this.ticketService = ticketService;
-    }
-
-    @PostMapping("/{eventId}/book")
-    public ResponseEntity<Ticket> bookTickets(@PathVariable String eventId, @RequestBody BookingRequest request) {
-        log.info("Received request to book tickets for eventId: {} by user: {}", eventId, request.getUserId());
+    // Endpoint to book a ticket
+    @PostMapping
+    public ResponseEntity<?> bookTicket(@RequestBody BookingDto dto) {
         try {
-            Ticket ticket = ticketService.bookTickets(eventId, request);
-            return ResponseEntity.ok(ticket);
-        } catch (RuntimeException e) {
-            log.error("Failed to book tickets: {}", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            Ticket ticket =  new Ticket();
+            BeanUtils.copyProperties(dto, ticket);
+            ticketService.bookTicket(ticket);
+            //send to analytics service by rabbitmq
+            Booking booking = new Booking();
+            booking.setBookingId(String.valueOf(ticket.getId()));
+            booking.setUserId(ticket.getUserid());
+            booking.setEventId(ticket.getEventid());
+            booking.setPrice(dto.getPrice());
+            booking.setDate(dto.getDate());
+            booking.setLocation(dto.getLocation());
+            booking.setBookingDate(dto.getBookingDate());
+            publisherService.publishMessage(booking);
+            return ResponseEntity.ok("Ticket booked successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error booking ticket: " + e.getMessage());
         }
     }
 
-    @GetMapping("/{eventId}")
-    public ResponseEntity<List<Ticket>> getTicketsByEventId(@PathVariable String eventId) {
-        log.info("Received request to get tickets for eventId: {}", eventId);
-        List<Ticket> tickets = ticketService.getTicketsByEventId(eventId);
-        return ResponseEntity.ok(tickets);
+    // Endpoint to get ticket details
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getTicket(@PathVariable int id) {
+        try {
+            Ticket ticket = ticketService.getTicket(id);
+            if (ticket != null) {
+                return ResponseEntity.ok(ticket);
+            } else {
+                return ResponseEntity.status(404).body("Ticket not found");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error fetching ticket: " + e.getMessage());
+        }
     }
 
-    @GetMapping("/{eventId}/available")
-    public ResponseEntity<Integer> getAvailableTickets(@PathVariable String eventId) {
-        log.info("Received request to get available tickets for eventId: {}", eventId);
-        int availableTickets = ticketService.getAvailableTickets(eventId);
-        return ResponseEntity.ok(availableTickets);
+    // Endpoint to cancel a ticket
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> cancelTicket(@PathVariable int id) {
+        try {
+            ticketService.cancelTicket(id);
+            return ResponseEntity.ok("Ticket cancelled successfully");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error cancelling ticket: " + e.getMessage());
+        }
+    }
+
+    // Endpoint to get tickets by user ID
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getTicketsByUserId(@PathVariable String userId) {
+        try {
+            return ResponseEntity.ok(ticketService.getTicketsByUserId(userId));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error fetching tickets: " + e.getMessage());
+        }
+    }
+
+    // Endpoint to get tickets by event ID
+    @GetMapping("/event/{eventId}")
+    public ResponseEntity<?> getTicketsByEventId(@PathVariable String eventId) {
+        try {
+            return ResponseEntity.ok(ticketService.getTicketsByEventId(eventId));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error fetching tickets: " + e.getMessage());
+        }
     }
 }

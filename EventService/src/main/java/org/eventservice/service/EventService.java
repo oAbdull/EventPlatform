@@ -1,16 +1,30 @@
-package org.example.eventservice.service;
+package org.eventservice.service;
 
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.eventservice.model.Event;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.eventservice.repo.EventRepository;
 
-@SpringBootApplication
-@EnableDiscoveryClient
-public class EventserviceApplication {
+import java.util.List;
 
-    public static void main(String[] args) {
-        SpringApplication.run(EventserviceApplication.class, args);
+@Service
+public class EventService {
+    @Autowired private EventRepository repository;
+
+    public void save(Event event){
+        repository.save(event);
     }
 
+    public List<Event> listAll(){
+        return repository.findAll();
+    }
+
+    public Event findById(String id){
+        return repository.findById(id).orElse(null);
+    }
+
+    public void deleteById(String id){
+        repository.deleteById(id);
+    }
 }

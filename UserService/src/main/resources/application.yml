@@ -1,0 +1,7 @@
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://dev--yrfqzl5.us.auth0.com/
+          audience: https://eventusers,https://dev--yrfqzl5.us.auth0.com/userinfo

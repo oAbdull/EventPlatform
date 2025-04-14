@@ -1,4 +1,4 @@
-package org.example.userservice.dtos;
+package org.userservice.dtos;
 
 public class LoginDto {
     private String userid;

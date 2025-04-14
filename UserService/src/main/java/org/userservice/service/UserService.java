@@ -1,9 +1,10 @@
-package org.example.userservice.service;
+package org.userservice.service;
 
-import org.example.userservice.model.User;
-import org.example.userservice.repo.UsersRepository;
+import org.userservice.model.User;
+import org.userservice.repo.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 
 import java.util.List;
 
