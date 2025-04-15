@@ -17,7 +17,7 @@ services:
     ports:
       - "8091:8081"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/usersdb
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5430/usersdb
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       eureka.client.serviceUrl.defaultZone: http://eureka-server:8761/eureka
