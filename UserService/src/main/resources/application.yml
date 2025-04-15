@@ -1,7 +1,22 @@
+#spring:
+#  security:
+#    oauth2:
+#      resourceserver:
+#        jwt:
+#          issuer-uri: https://dev--yrfqzl5.us.auth0.com/
+#          audience: https://eventusers,https://dev--yrfqzl5.us.auth0.com/userinfo
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+      base-path: /actuator
+      access: permitAll
+  endpoint:
+    health:
+      show-details: always
 spring:
   security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: https://dev--yrfqzl5.us.auth0.com/
-          audience: https://eventusers,https://dev--yrfqzl5.us.auth0.com/userinfo
+    filter-chain-order: 0

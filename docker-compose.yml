@@ -37,7 +37,7 @@ services:
     ports:
       - "8092:8082"
     environment:
-      SPRING_DATA_MONGODB_URI: mongodb://admin:password@mongodb:27017/eventDB?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/eventsdb
       eureka.client.serviceUrl.defaultZone: http://eureka-server:8761/eureka
       SPRING_DOCKER_COMPOSE_ENABLED: "false"
       SPRING_RABBITMQ_HOST: rabbitmq

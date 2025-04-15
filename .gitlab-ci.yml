@@ -313,7 +313,6 @@ deploy-apigateway:
   environment: production
   needs:
     - sonarqube-check
-  when: manual
 
 deploy-eventservice:
   stage: deploy
@@ -332,7 +331,6 @@ deploy-eventservice:
   environment: production
   needs:
     - sonarqube-check
-  when: manual
 
 deploy-userservice:
   stage: deploy
@@ -351,7 +349,6 @@ deploy-userservice:
   environment: production
   needs:
     - sonarqube-check
-  when: manual
 
 deploy-ticketservice:
   stage: deploy
@@ -370,4 +367,3 @@ deploy-ticketservice:
   environment: production
   needs:
     - sonarqube-check
-  when: manual
