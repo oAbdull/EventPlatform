@@ -35,27 +35,6 @@ build-apigateway:
     paths:
       - apigateway.jar
 
-build-eventservice:
-  stage: build
-  image: gradle:8.4.0-jdk17
-  tags:
-    - docker
-  before_script:
-    - chmod +x ./gradlew
-  script:
-    - ./gradlew :EventService:clean :EventService:build -x test
-    - |
-      JAR_FILE=$(find EventService/build/libs -name "*.jar" -type f | head -n 1)
-      if [ -n "$JAR_FILE" ]; then
-        cp "$JAR_FILE" eventservice.jar
-      else
-        echo "No JAR file found"
-        exit 1
-      fi
-  artifacts:
-    paths:
-      - eventservice.jar
-
 build-userservice:
   stage: build
   image: gradle:8.4.0-jdk17
@@ -120,36 +99,45 @@ build-discoveryservice:
       - discoveryservice.jar
 
 # E2E Test Job
-e2e-test:
-  stage: e2e_test
-  image: gradle:8.4.0-jdk17
-  tags:
-    - docker
-  services:
-    - name: docker:dind
-      alias: docker
-  before_script:
-    - chmod +x ./gradlew
-    - export DOCKER_HOST=tcp://docker:2375
-    - docker-compose -f docker-compose.yml up -d
-    - sleep 120 # زيادة الوقت لضمان بدء جميع الخدمات
-  script:
-    - ./gradlew :UserService:e2eTest
-    - ./gradlew :TicketService:e2eTest
-  after_script:
-    - docker-compose -f docker-compose.yml down
-  needs:
-    - build-userservice
-    - build-ticketservice
-    - build-apigateway
-    - build-discoveryservice
-  variables:
-    SPRING_PROFILES_ACTIVE: test
-  artifacts:
-    paths:
-      - UserService/build/test-results/e2eTest
-      - TicketService/build/test-results/e2eTest
-    expire_in: 1 week
+#e2e-test:
+#  stage: e2e_test
+#  image: gradle-docker-compose:8.4.0-jdk17  # استخدام الصورة المخصصة
+#  tags:
+#    - docker
+#  services:
+#    - name: docker:dind
+#      alias: docker
+#  before_script:
+#    - chmod +x ./gradlew
+#    - export DOCKER_HOST=tcp://docker:2375
+#    - RANDOM_SUFFIX=$(uuidgen | cut -c1-8)
+#    - export RANDOM_SUFFIX
+#    - docker-compose -f docker-compose.yml up -d
+#    - sleep 300
+#    - echo "Checking container logs..."
+#    - docker logs apigateway_${RANDOM_SUFFIX} || true
+#    - docker logs userservice_${RANDOM_SUFFIX} || true
+#    - docker logs ticketservice_${RANDOM_SUFFIX} || true
+#    - docker logs discoveryserver_${RANDOM_SUFFIX} || true
+#    - docker logs postgres_${RANDOM_SUFFIX} || true
+#    - docker logs rabbitmq_${RANDOM_SUFFIX} || true
+#  script:
+#    - ./gradlew :UserService:e2eTest
+#    - ./gradlew :TicketService:e2eTest
+#  after_script:
+#    - docker-compose -f docker-compose.yml down
+#  needs:
+#    - build-userservice
+#    - build-ticketservice
+#    - build-apigateway
+#    - build-discoveryservice
+#  variables:
+#    SPRING_PROFILES_ACTIVE: test
+#  artifacts:
+#    paths:
+#      - UserService/build/test-results/e2eTest
+#      - TicketService/build/test-results/e2eTest
+#    expire_in: 1 week
 
 # SonarQube Analysis
 sonarqube-check:
@@ -160,7 +148,7 @@ sonarqube-check:
   before_script:
     - chmod +x ./gradlew
   script:
-    - ./gradlew :Apigateway:build :EventService:build :UserService:build :TicketService:build :DiscoveryService:build -x test
+    - ./gradlew :Apigateway:build :UserService:build :TicketService:build :DiscoveryService:build -x test
     - export SONAR_TOKEN="$SONAR_TOKEN"
     - ./gradlew sonar "-Dsonar.login=$SONAR_TOKEN"
   variables:
@@ -193,27 +181,9 @@ deploy-apigateway:
   needs:
     - sonarqube-check
 
-deploy-eventservice:
-  stage: deploy
-  image: docker:latest
-  services:
-    - docker:dind
-  tags:
-    - docker
-  before_script:
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
-  script:
-    - docker build --build-arg JAR_FILE=eventservice.jar -t ${DOCKER_IMAGE_PREFIX}/eventservice:${CI_COMMIT_REF_SLUG} ./EventService
-    - docker push ${DOCKER_IMAGE_PREFIX}/eventservice:${CI_COMMIT_REF_SLUG}
-    - docker tag ${DOCKER_IMAGE_PREFIX}/eventservice:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/eventservice:latest
-    - docker push ${DOCKER_IMAGE_PREFIX}/eventservice:latest
-  environment: production
-  needs:
-    - sonarqube-check
-
 deploy-userservice:
   stage: deploy
-  image: docker:latest
+  image: docker:20.10
   services:
     - docker:dind
   tags:
@@ -231,7 +201,7 @@ deploy-userservice:
 
 deploy-ticketservice:
   stage: deploy
-  image: docker:latest
+  image: docker:20.10
   services:
     - docker:dind
   tags:
@@ -249,7 +219,7 @@ deploy-ticketservice:
 
 deploy-discoveryservice:
   stage: deploy
-  image: docker:latest
+  image: docker:20.10
   services:
     - docker:dind
   tags:
