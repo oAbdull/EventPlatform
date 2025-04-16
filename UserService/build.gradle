@@ -70,7 +70,12 @@ tasks.named('test') {
     useJUnitPlatform()
     finalizedBy jacocoTestReport
 }
-
+tasks.register('e2eTest', Test) {
+    useJUnitPlatform()
+    filter {
+        includeTestsMatching '*E2ETest'
+    }
+}
 jacocoTestReport {
     reports {
         xml.required = true

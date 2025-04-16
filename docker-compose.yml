@@ -3,7 +3,7 @@ services:
     build:
       context: ./DiscoveryService
       dockerfile: Dockerfile
-    container_name: discoveryserver
+    container_name: discoveryserver_${RANDOM_SUFFIX}
     ports:
       - "8761:8761"
     networks:
@@ -13,54 +13,36 @@ services:
     build:
       context: ./UserService
       dockerfile: Dockerfile
-    container_name: "userservice"
+    container_name: userservice_${RANDOM_SUFFIX}
     ports:
       - "8091:8081"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5430/usersdb
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_${RANDOM_SUFFIX}:5432/usersdb
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      eureka.client.serviceUrl.defaultZone: http://eureka-server:8761/eureka
+      eureka.client.serviceUrl.defaultZone: http://discoveryserver_${RANDOM_SUFFIX}:8761/eureka
       SPRING_DOCKER_COMPOSE_ENABLED: "false"
-      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_HOST: rabbitmq_${RANDOM_SUFFIX}
     networks:
       - microservices-network
     depends_on:
       - postgres
       - rabbitmq
 
-  eventservice:
-    build:
-      context: ./EventService
-      dockerfile: Dockerfile
-    container_name: "eventservice"
-    ports:
-      - "8092:8082"
-    environment:
-      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/eventsdb
-      eureka.client.serviceUrl.defaultZone: http://eureka-server:8761/eureka
-      SPRING_DOCKER_COMPOSE_ENABLED: "false"
-      SPRING_RABBITMQ_HOST: rabbitmq
-    networks:
-      - microservices-network
-    depends_on:
-      - mongodb
-      - rabbitmq
-
   ticketservice:
     build:
       context: ./TicketService
       dockerfile: Dockerfile
-    container_name: "ticketservice"
+    container_name: ticketservice_${RANDOM_SUFFIX}
     ports:
       - "8093:8083"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ticketsdb
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_${RANDOM_SUFFIX}:5432/ticketsdb
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
-      eureka.client.serviceUrl.defaultZone: http://eureka-server:8761/eureka
+      eureka.client.serviceUrl.defaultZone: http://discoveryserver_${RANDOM_SUFFIX}:8761/eureka
       SPRING_DOCKER_COMPOSE_ENABLED: "false"
-      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_HOST: rabbitmq_${RANDOM_SUFFIX}
     networks:
       - microservices-network
     depends_on:
@@ -71,18 +53,19 @@ services:
     build:
       context: ./Apigateway
       dockerfile: Dockerfile
-    container_name: "apigateway"
+    container_name: apigateway_${RANDOM_SUFFIX}
     ports:
       - "8090:8080"
     environment:
       SPRING_DOCKER_COMPOSE_ENABLED: "false"
-      eureka.client.serviceUrl.defaultZone: http://eureka-server:8761/eureka
+      eureka.client.serviceUrl.defaultZone: http://discoveryserver_${RANDOM_SUFFIX}:8761/eureka
     networks:
       - microservices-network
 
   postgres:
     image: postgres:15.3-alpine3.18
     restart: always
+    container_name: postgres_${RANDOM_SUFFIX}
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
@@ -100,32 +83,9 @@ services:
     networks:
       - microservices-network
 
-  mongodb:
-    image: "mongo:7.0"
-    container_name: "mongodb"
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
-    deploy:
-      resources:
-        limits:
-          memory: 2g
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 15s
-      timeout: 10s
-      retries: 10
-      start_period: 30s
-    networks:
-      - microservices-network
-
   rabbitmq:
     image: rabbitmq:management
-    container_name: rabbitmq
+    container_name: rabbitmq_${RANDOM_SUFFIX}
     restart: always
     ports:
       - 5672:5672
@@ -138,7 +98,7 @@ services:
       - rabbitmq-log:/var/log/rabbitmq
       - rabbitmq_data:/var/lib/rabbitmq/mnesia
     healthcheck:
-      test: ["CMD", "nc", "-z", "rabbitmq", "5672"]
+      test: ["CMD", "nc", "-z", "rabbitmq_${RANDOM_SUFFIX}", "5672"]
       interval: 1m30s
       timeout: 30s
       retries: 5
@@ -157,4 +117,3 @@ volumes:
     driver: local
   rabbitmq_data:
   db-data:
-  mongodb_data:

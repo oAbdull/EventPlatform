@@ -88,4 +88,10 @@ public class TicketController {
             return ResponseEntity.status(500).body("Error fetching tickets: " + e.getMessage());
         }
     }
+
+    @PostMapping("/book")
+    public ResponseEntity<String> bookTicket(@RequestBody Ticket ticket) {
+        ticketService.bookTicket(ticket);
+        return ResponseEntity.ok("Ticket booked successfully");
+    }
 }

@@ -1,25 +1,22 @@
 stages:
   - build
-  - test
   - e2e_test
   - code_quality
   - deploy
 
-# Add a service definition for docker:dind with an alias
 services:
   - name: docker:dind
     alias: docker
 
-# Add cache configuration for all jobs
 cache:
   key: ${CI_COMMIT_REF_SLUG}
   paths:
     - .gradle/
 
-# Build Jobs (No changes)
+# Build Jobs
 build-apigateway:
   stage: build
-  image: gradle:jdk17
+  image: gradle:8.4.0-jdk17
   tags:
     - docker
   before_script:
@@ -31,8 +28,7 @@ build-apigateway:
       if [ -n "$JAR_FILE" ]; then
         cp "$JAR_FILE" apigateway.jar
       else
-        echo "No JAR file found in Apigateway/build/libs directory"
-        find Apigateway/build -name "*.jar" -type f
+        echo "No JAR file found"
         exit 1
       fi
   artifacts:
@@ -41,7 +37,7 @@ build-apigateway:
 
 build-eventservice:
   stage: build
-  image: gradle:jdk17
+  image: gradle:8.4.0-jdk17
   tags:
     - docker
   before_script:
@@ -53,8 +49,7 @@ build-eventservice:
       if [ -n "$JAR_FILE" ]; then
         cp "$JAR_FILE" eventservice.jar
       else
-        echo "No JAR file found in EventService/build/libs directory"
-        find EventService/build -name "*.jar" -type f
+        echo "No JAR file found"
         exit 1
       fi
   artifacts:
@@ -63,7 +58,7 @@ build-eventservice:
 
 build-userservice:
   stage: build
-  image: gradle:jdk17
+  image: gradle:8.4.0-jdk17
   tags:
     - docker
   before_script:
@@ -75,8 +70,7 @@ build-userservice:
       if [ -n "$JAR_FILE" ]; then
         cp "$JAR_FILE" userservice.jar
       else
-        echo "No JAR file found in UserService/build/libs directory"
-        find UserService/build -name "*.jar" -type f
+        echo "No JAR file found"
         exit 1
       fi
   artifacts:
@@ -85,7 +79,7 @@ build-userservice:
 
 build-ticketservice:
   stage: build
-  image: gradle:jdk17
+  image: gradle:8.4.0-jdk17
   tags:
     - docker
   before_script:
@@ -97,209 +91,93 @@ build-ticketservice:
       if [ -n "$JAR_FILE" ]; then
         cp "$JAR_FILE" ticketservice.jar
       else
-        echo "No JAR file found in TicketService/build/libs directory"
-        find TicketService/build -name "*.jar" -type f
+        echo "No JAR file found"
         exit 1
       fi
   artifacts:
     paths:
       - ticketservice.jar
 
-# Test Jobs (Updated with services for database connectivity)
-#test-apigateway:
-#  stage: test
-#  image: gradle:jdk17
-#  tags:
-#    - docker
-#  script:
-#    - chmod +x ./gradlew
-#    - ./gradlew :Apigateway:test :Apigateway:jacocoTestReport
-#  needs:
-#    - build-apigateway
-#  artifacts:
-#    paths:
-#      - Apigateway/build/test-results/test
-#      - Apigateway/build/reports/jacoco/test/jacocoTestReport.xml
-#
-#test-eventservice:
-#  stage: test
-#  image: gradle:jdk17
-#  tags:
-#    - docker
-#  script:
-#    - chmod +x ./gradlew
-#    - ./gradlew :EventService:test :EventService:jacocoTestReport
-#  needs:
-#    - build-eventservice
-#  artifacts:
-#    paths:
-#      - EventService/build/test-results/test
-#      - EventService/build/reports/jacoco/test/jacocoTestReport.xml
-#
-#test-userservice:
-#  stage: test
-#  image: gradle:jdk17
-#  tags:
-#    - docker
-#  services:
-#    - name: postgres:15.3-alpine3.18
-#      alias: postgres
-#    - name: rabbitmq:management
-#      alias: rabbitmq
-#  script:
-#    - chmod +x ./gradlew
-#    - ./gradlew :UserService:test :UserService:jacocoTestReport
-#  artifacts:
-#    paths:
-#      - UserService/build/test-results/test
-#      - UserService/build/reports/jacoco/test/jacocoTestReport.xml
-#  variables:
-#    SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/usersdb
-#    SPRING_DATASOURCE_USERNAME: postgres
-#    SPRING_DATASOURCE_PASSWORD: postgres
-#    SPRING_RABBITMQ_HOST: rabbitmq
-#
-#test-ticketservice:
-#  stage: test
-#  image: gradle:jdk17
-#  tags:
-#    - docker
-#  services:
-#    - name: postgres:15.3-alpine3.18
-#      alias: postgres
-#    - name: rabbitmq:management
-#      alias: rabbitmq
-#  script:
-#    - chmod +x ./gradlew
-#    - ./gradlew :TicketService:test :TicketService:jacocoTestReport
-#  artifacts:
-#    paths:
-#      - TicketService/build/test-results/test
-#      - TicketService/build/reports/jacoco/test/jacocoTestReport.xml
-#  variables:
-#    SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ticketsdb
-#    SPRING_DATASOURCE_USERNAME: postgres
-#    SPRING_DATASOURCE_PASSWORD: postgres
-#    SPRING_RABBITMQ_HOST: rabbitmq
-#
-## E2E Test Jobs (Updated)
-#e2e-test-apigateway:
-#  stage: e2e_test
-#  image: node:20
-#  tags:
-#    - docker
-#  before_script:
-#    - npm install -g newman
-#    - apk add --no-cache docker-cli docker-compose
-#    - export DOCKER_HOST=tcp://docker:2375
-#    - docker-compose -f docker-compose.yml up -d
-#    - sleep 60
-#  script:
-#    - cd Apigateway
-#    - newman run ApigatewayE2E.postman_collection.json --env-var "baseUrl=http://apigateway:8080"
-#  after_script:
-#    - docker-compose -f docker-compose.yml down
-#  needs:
-#    - test-apigateway
-#  variables:
-#    SPRING_PROFILES_ACTIVE: test
-#
-#e2e-test-eventservice:
-#  stage: e2e_test
-#  image: node:20
-#  tags:
-#    - docker
-#  before_script:
-#    - npm install -g newman
-#    - apk add --no-cache docker-cli docker-compose
-#    - export DOCKER_HOST=tcp://docker:2375
-#    - docker-compose -f docker-compose.yml up -d
-#    - sleep 60
-#  script:
-#    - cd EventService
-#    - newman run EventServiceE2E.postman_collection.json --env-var "baseUrl=http://eventservice:8082"
-#  after_script:
-#    - docker-compose -f docker-compose.yml down
-#  needs:
-#    - test-eventservice
-#  variables:
-#    SPRING_PROFILES_ACTIVE: test
-#
-#e2e-test-userservice:
-#  stage: e2e_test
-#  image: node:20
-#  tags:
-#    - docker
-#  before_script:
-#    - npm install -g newman
-#    - apk add --no-cache docker-cli docker-compose
-#    - export DOCKER_HOST=tcp://docker:2375
-#    - docker-compose -f docker-compose.yml up -d
-#    - sleep 60
-#  script:
-#    - cd UserService
-#    - newman run UserServiceE2E.postman_collection.json --env-var "baseUrl=http://userservice:8081"
-#  after_script:
-#    - docker-compose -f docker-compose.yml down
-#  needs:
-#    - test-userservice
-#  variables:
-#    SPRING_PROFILES_ACTIVE: test
-#
-#e2e-test-ticketservice:
-#  stage: e2e_test
-#  image: node:20
-#  tags:
-#    - docker
-#  before_script:
-#    - npm install -g newman
-#    - apk add --no-cache docker-cli docker-compose
-#    - export DOCKER_HOST=tcp://docker:2375
-#    - docker-compose -f docker-compose.yml up -d
-#    - sleep 60
-#  script:
-#    - cd TicketService
-#    - newman run TicketServiceE2E.postman_collection.json --env-var "baseUrl=http://ticketservice:8083"
-#  after_script:
-#    - docker-compose -f docker-compose.yml down
-#  needs:
-#    - test-ticketservice
-#  variables:
-#    SPRING_PROFILES_ACTIVE: test
-
-# SonarQube Analysis (Updated)
-sonarqube-check:
-  stage: code_quality
-  image: gradle:jdk17
+build-discoveryservice:
+  stage: build
+  image: gradle:8.4.0-jdk17
   tags:
     - docker
-    - gradle
   before_script:
     - chmod +x ./gradlew
   script:
-    - echo "Running SonarQube Analysis for all services"
-    - ./gradlew :Apigateway:build :EventService:build :UserService:build :TicketService:build -x test
-    - ./gradlew :Apigateway:test :EventService:test :UserService:test :TicketService:test
+    - ./gradlew :DiscoveryService:clean :DiscoveryService:build -x test
+    - |
+      JAR_FILE=$(find DiscoveryService/build/libs -name "*.jar" -type f | head -n 1)
+      if [ -n "$JAR_FILE" ]; then
+        cp "$JAR_FILE" discoveryservice.jar
+      else
+        echo "No JAR file found"
+        exit 1
+      fi
+  artifacts:
+    paths:
+      - discoveryservice.jar
+
+# E2E Test Job
+e2e-test:
+  stage: e2e_test
+  image: gradle:8.4.0-jdk17
+  tags:
+    - docker
+  services:
+    - name: docker:dind
+      alias: docker
+  before_script:
+    - chmod +x ./gradlew
+    - export DOCKER_HOST=tcp://docker:2375
+    - docker-compose -f docker-compose.yml up -d
+    - sleep 120 # زيادة الوقت لضمان بدء جميع الخدمات
+  script:
+    - ./gradlew :UserService:e2eTest
+    - ./gradlew :TicketService:e2eTest
+  after_script:
+    - docker-compose -f docker-compose.yml down
+  needs:
+    - build-userservice
+    - build-ticketservice
+    - build-apigateway
+    - build-discoveryservice
+  variables:
+    SPRING_PROFILES_ACTIVE: test
+  artifacts:
+    paths:
+      - UserService/build/test-results/e2eTest
+      - TicketService/build/test-results/e2eTest
+    expire_in: 1 week
+
+# SonarQube Analysis
+sonarqube-check:
+  stage: code_quality
+  image: gradle:8.4.0-jdk17
+  tags:
+    - docker
+  before_script:
+    - chmod +x ./gradlew
+  script:
+    - ./gradlew :Apigateway:build :EventService:build :UserService:build :TicketService:build :DiscoveryService:build -x test
     - export SONAR_TOKEN="$SONAR_TOKEN"
     - ./gradlew sonar "-Dsonar.login=$SONAR_TOKEN"
   variables:
     SONAR_HOST_URL: "https://sonarcloud.io"
     SONAR_LOGIN: "$SONAR_TOKEN"
   needs:
-#    - e2e-test-apigateway
-#    - e2e-test-eventservice
-#    - e2e-test-userservice
-#    - e2e-test-ticketservice
+    - e2e-test
   only:
     - main
     - dev
     - master
   allow_failure: true
 
-# Deploy Jobs (No changes)
+# Deploy Jobs
 deploy-apigateway:
   stage: deploy
-  image: docker:latest
+  image: docker:20.10
   services:
     - docker:dind
   tags:
@@ -365,6 +243,24 @@ deploy-ticketservice:
     - docker push ${DOCKER_IMAGE_PREFIX}/ticketservice:${CI_COMMIT_REF_SLUG}
     - docker tag ${DOCKER_IMAGE_PREFIX}/ticketservice:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/ticketservice:latest
     - docker push ${DOCKER_IMAGE_PREFIX}/ticketservice:latest
+  environment: production
+  needs:
+    - sonarqube-check
+
+deploy-discoveryservice:
+  stage: deploy
+  image: docker:latest
+  services:
+    - docker:dind
+  tags:
+    - docker
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+  script:
+    - docker build --build-arg JAR_FILE=discoveryservice.jar -t ${DOCKER_IMAGE_PREFIX}/discoveryservice:${CI_COMMIT_REF_SLUG} ./DiscoveryService
+    - docker push ${DOCKER_IMAGE_PREFIX}/discoveryservice:${CI_COMMIT_REF_SLUG}
+    - docker tag ${DOCKER_IMAGE_PREFIX}/discoveryservice:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/discoveryservice:latest
+    - docker push ${DOCKER_IMAGE_PREFIX}/discoveryservice:latest
   environment: production
   needs:
     - sonarqube-check
