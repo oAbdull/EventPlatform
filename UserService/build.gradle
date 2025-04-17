@@ -39,6 +39,7 @@ dependencies {
     implementation 'org.hibernate:hibernate-core:6.2.7.Final'
     implementation 'com.mashape.unirest:unirest-java:1.4.9'
     annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'com.h2database:h2'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'io.rest-assured:rest-assured:5.4.0'
