@@ -28,6 +28,20 @@ services:
     depends_on:
       - postgres
       - rabbitmq
+  event-service:
+    build:
+      context: ./event-service
+      dockerfile: Dockerfile
+    container_name: event-service
+    ports:
+      - "8002:8002"
+    environment:
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/eventsdb
+      eureka.client.serviceUrl.defaultZone: http://eureka-server:8761/eureka
+    networks:
+      - microservices-network
+    depends_on:
+      - eureka-server
 
   ticketservice:
     build:
@@ -82,7 +96,15 @@ services:
       start_period: 30s
     networks:
       - microservices-network
-
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - 27017:27017
+    networks:
+      - microservices-network
+      -
   rabbitmq:
     image: rabbitmq:management
     container_name: rabbitmq_${RANDOM_SUFFIX}
