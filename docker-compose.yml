@@ -1,99 +1,141 @@
-# docker-compose.yml
 services:
-  rabbitmq:
-    image: "rabbitmq:3-management"
-    container_name: "rabbitmq"
+  eureka-server:
+    build:
+      context: ./DiscoveryService
+      dockerfile: Dockerfile
+    container_name: discoveryserver_${RANDOM_SUFFIX}
     ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      RABBITMQ_DEFAULT_USER: guest
-      RABBITMQ_DEFAULT_PASS: guest
-    healthcheck:
-      test: ["CMD", "rabbitmqctl", "status"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  mongodb:
-    image: "mongo:7.0"
-    container_name: "mongodb"
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb_data:/data/db
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password
-    deploy:
-      resources:
-        limits:
-          memory: 2g
-    healthcheck:
-      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')" ]
-      interval: 15s
-      timeout: 10s
-      retries: 10
-      start_period: 30s
+      - "8761:8761"
+    networks:
+      - microservices-network
 
   userservice:
     build:
       context: ./UserService
-    container_name: "userservice"
+      dockerfile: Dockerfile
+    container_name: userservice_${RANDOM_SUFFIX}
     ports:
       - "8091:8081"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      mongodb:
-        condition: service_healthy
     environment:
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_DATA_MONGODB_URI=mongodb://admin:password@mongodb:27017/userDB?authSource=admin
-  apigateway:
-    build:
-      context: ./Apigateway
-    container_name: "apigateway"
-    ports:
-      - "8090:8080"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_${RANDOM_SUFFIX}:5432/usersdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      eureka.client.serviceUrl.defaultZone: http://discoveryserver_${RANDOM_SUFFIX}:8761/eureka
+      SPRING_DOCKER_COMPOSE_ENABLED: "false"
+      SPRING_RABBITMQ_HOST: rabbitmq_${RANDOM_SUFFIX}
+    networks:
+      - microservices-network
     depends_on:
+      - postgres
       - rabbitmq
-      - eventservice
-      - userservice
-    environment:
-      - USER_SERVICE_HOST=userservice
-      - USER_SERVICE_PORT=8081
-      - EVENT_SERVICE_HOST=eventservice
-      - EVENT_SERVICE_PORT=8082
-
-  eventservice:
+  event-service:
     build:
-      context: ./EventService
-    container_name: "eventservice"
+      context: ./event-service
+      dockerfile: Dockerfile
+    container_name: event-service
     ports:
-      - "8092:8082"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      mongodb:
-        condition: service_healthy
+      - "8002:8002"
     environment:
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_DATA_MONGODB_URI=mongodb://admin:password@mongodb:27017/eventDB?authSource=admin
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/eventsdb
+      eureka.client.serviceUrl.defaultZone: http://eureka-server:8761/eureka
+    networks:
+      - microservices-network
+    depends_on:
+      - eureka-server
+
   ticketservice:
     build:
       context: ./TicketService
-    container_name: "ticketservice"
+      dockerfile: Dockerfile
+    container_name: ticketservice_${RANDOM_SUFFIX}
     ports:
       - "8093:8083"
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-      mongodb:
-        condition: service_healthy
     environment:
-      - SPRING_RABBITMQ_HOST=rabbitmq
-      - SPRING_DATA_MONGODB_URI=mongodb://admin:password@mongodb:27017/ticketDB?authSource=admin
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_${RANDOM_SUFFIX}:5432/ticketsdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      eureka.client.serviceUrl.defaultZone: http://discoveryserver_${RANDOM_SUFFIX}:8761/eureka
+      SPRING_DOCKER_COMPOSE_ENABLED: "false"
+      SPRING_RABBITMQ_HOST: rabbitmq_${RANDOM_SUFFIX}
+    networks:
+      - microservices-network
+    depends_on:
+      - postgres
+      - rabbitmq
+
+  apigateway:
+    build:
+      context: ./Apigateway
+      dockerfile: Dockerfile
+    container_name: apigateway_${RANDOM_SUFFIX}
+    ports:
+      - "8090:8080"
+    environment:
+      SPRING_DOCKER_COMPOSE_ENABLED: "false"
+      eureka.client.serviceUrl.defaultZone: http://discoveryserver_${RANDOM_SUFFIX}:8761/eureka
+    networks:
+      - microservices-network
+
+  postgres:
+    image: postgres:15.3-alpine3.18
+    restart: always
+    container_name: postgres_${RANDOM_SUFFIX}
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./create-db.sql:/docker-entrypoint-initdb.d/create_database.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - microservices-network
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - 27017:27017
+    networks:
+      - microservices-network
+      -
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq_${RANDOM_SUFFIX}
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq-lib:/var/lib/rabbitmq
+      - rabbitmq-log:/var/log/rabbitmq
+      - rabbitmq_data:/var/lib/rabbitmq/mnesia
+    healthcheck:
+      test: ["CMD", "nc", "-z", "rabbitmq_${RANDOM_SUFFIX}", "5672"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+    networks:
+      - microservices-network
+
+networks:
+  microservices-network:
+    driver: bridge
+
 volumes:
-  mongodb_data:
-    name: mongodb_data
+  rabbitmq-lib:
+    driver: local
+  rabbitmq-log:
+    driver: local
+  rabbitmq_data:
+  db-data:
