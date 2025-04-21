@@ -1,0 +1,47 @@
+server:
+  port: 8003
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://eventplatform0.eu.auth0.com/
+          audience: https://eventplatform/api,https://eventplatform0.eu.auth0.com/userinfo
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ticketsdb
+    username: postgres
+    password: postgres
+    dialect: org.hibernate.dialect.PostgreSQLDialect
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  application:
+    name: ticket-service
+  rabbitmq:
+    host: "localhost"
+    port: 5672
+    username: "guest"
+    password: "guest"
+  amqp:
+    deserialization:
+      trust:
+        all: true
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+
+rabbitmq:
+  exchange:
+    name: "rabbit_exchange"
+  queue:
+    name: "rabbit_subscription_queue"
+  routing:
+    key: "subscription_routing_key"
+

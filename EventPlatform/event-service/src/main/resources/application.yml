@@ -1,0 +1,42 @@
+server:
+    port: 8002
+
+rabbitmq:
+  exchange:
+    name: "rabbit_exchange"
+  queue:
+    name: "rabbit_subscription_queue"
+  routing:
+    key: "subscription_routing_key"
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+    register-with-eureka: true
+    fetch-registry: true
+
+spring:
+  application:
+      name: event-service
+  rabbitmq:
+    host: "localhost"
+    port: 5672
+    username: "guest"
+    password: "guest"
+    amqp:
+      deserialization:
+        trust:
+          all: true
+  data:
+    mongodb:
+      uri:  mongodb://localhost:27017/eventservice
+      database: eventservice
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://eventplatform0.eu.auth0.com/
+          audience: https://eventplatform/api,https://eventplatform0.eu.auth0.com/userinfo

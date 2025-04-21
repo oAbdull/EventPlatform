@@ -1,0 +1,237 @@
+stages:
+  - build
+  - e2e_test
+  - code_quality
+  - deploy
+
+services:
+  - name: docker:dind
+    alias: docker
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - .gradle/
+
+# Build Jobs
+build-api-gateway:
+  stage: build
+  image: gradle:8.4.0-jdk17
+  tags:
+    - docker
+  before_script:
+    - chmod +x ./gradlew
+  script:
+    - ./gradlew :api-gateway:clean :api-gateway:build -x test
+    - |
+      JAR_FILE=$(find api-gateway/build/libs -name "*.jar" -type f | head -n 1)
+      if [ -n "$JAR_FILE" ]; then
+        cp "$JAR_FILE" api-gateway.jar
+      else
+        echo "No JAR file found"
+        exit 1
+      fi
+  artifacts:
+    paths:
+      - api-gateway.jar
+
+build-event-service:
+  stage: build
+  image: gradle:8.4.0-jdk17
+  tags:
+    - docker
+  before_script:
+    - chmod +x ./gradlew
+  script:
+    - ./gradlew :event-service:clean :event-service:build -x test
+    - |
+      JAR_FILE=$(find event-service/build/libs -name "*.jar" -type f | head -n 1)
+      if [ -n "$JAR_FILE" ]; then
+        cp "$JAR_FILE" event-service.jar
+      else
+        echo "No JAR file found"
+        exit 1
+      fi
+  artifacts:
+    paths:
+      - event-service.jar
+
+build-ticket-service:
+  stage: build
+  image: gradle:8.4.0-jdk17
+  tags:
+    - docker
+  before_script:
+    - chmod +x ./gradlew
+  script:
+    - ./gradlew :ticket-service:clean :ticket-service:build -x test
+    - |
+      JAR_FILE=$(find ticket-service/build/libs -name "*.jar" -type f | head -n 1)
+      if [ -n "$JAR_FILE" ]; then
+        cp "$JAR_FILE" ticket-service.jar
+      else
+        echo "No JAR file found"
+        exit 1
+      fi
+  artifacts:
+    paths:
+      - ticket-service.jar
+
+build-eureka-server:
+  stage: build
+  image: gradle:8.4.0-jdk17
+  tags:
+    - docker
+  before_script:
+    - chmod +x ./gradlew
+  script:
+    - ./gradlew :discovery-service:clean :discovery-service:build -x test
+    - |
+      JAR_FILE=$(find discovery-service/build/libs -name "*.jar" -type f | head -n 1)
+      if [ -n "$JAR_FILE" ]; then
+        cp "$JAR_FILE" eureka-server.jar
+      else
+        echo "No JAR file found"
+        exit 1
+      fi
+  artifacts:
+    paths:
+      - eureka-server.jar
+
+# E2E Test Job
+e2e-test:
+  stage: e2e_test
+  image: gradle-docker-compose:8.4.0-jdk17
+  tags:
+    - docker
+  services:
+    - name: docker:dind
+      alias: docker
+  before_script:
+    - chmod +x ./gradlew
+    - export DOCKER_HOST=tcp://docker:2375
+    - RANDOM_SUFFIX=$(uuidgen | cut -c1-8)
+    - export RANDOM_SUFFIX
+    - docker-compose -f docker-compose.yml up -d
+    - sleep 300
+    - echo "Checking container logs..."
+    - docker logs api-gateway_${RANDOM_SUFFIX} || true
+    - docker logs event-service_${RANDOM_SUFFIX} || true
+    - docker logs ticket-service_${RANDOM_SUFFIX} || true
+    - docker logs discovery-server_${RANDOM_SUFFIX} || true
+    - docker logs postgres_${RANDOM_SUFFIX} || true
+    - docker logs mongodb_${RANDOM_SUFFIX} || true
+    - docker logs rabbitmq_${RANDOM_SUFFIX} || true
+  script:
+    - ./gradlew :event-service:e2eTest
+    - ./gradlew :ticket-service:e2eTest
+  after_script:
+    - docker-compose -f docker-compose.yml down
+  needs:
+    - build-event-service
+    - build-ticket-service
+    - build-api-gateway
+    - build-eureka-server
+  variables:
+    SPRING_PROFILES_ACTIVE: test
+  artifacts:
+    paths:
+      - event-service/build/test-results/e2eTest
+      - ticket-service/build/test-results/e2eTest
+    expire_in: 1 week
+
+# SonarQube Analysis
+sonarqube-check:
+  stage: code_quality
+  image: gradle:8.4.0-jdk17
+  tags:
+    - docker
+  before_script:
+    - chmod +x ./gradlew
+  script:
+    - ./gradlew :api-gateway:build :event-service:build :ticket-service:build :discovery-service:build -x test
+    - export SONAR_TOKEN="$SONAR_TOKEN"
+    - ./gradlew sonar "-Dsonar.login=$SONAR_TOKEN"
+  variables:
+    SONAR_HOST_URL: "https://sonarcloud.io"
+    SONAR_LOGIN: "$SONAR_TOKEN"
+  needs:
+    - e2e-test
+  only:
+    - main
+    - dev
+    - master
+  allow_failure: true
+
+# Deploy Jobs
+deploy-api-gateway:
+  stage: deploy
+  image: docker:20.10
+  services:
+    - docker:dind
+  tags:
+    - docker
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+  script:
+    - docker build --build-arg JAR_FILE=api-gateway.jar -t ${DOCKER_IMAGE_PREFIX}/api-gateway:${CI_COMMIT_REF_SLUG} ./api-gateway
+    - docker push ${DOCKER_IMAGE_PREFIX}/api-gateway:${CI_COMMIT_REF_SLUG}
+    - docker tag ${DOCKER_IMAGE_PREFIX}/api-gateway:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/api-gateway:latest
+    - docker push ${DOCKER_IMAGE_PREFIX}/api-gateway:latest
+  environment: production
+  needs:
+    - sonarqube-check
+
+deploy-event-service:
+  stage: deploy
+  image: docker:20.10
+  services:
+    - docker:dind
+  tags:
+    - docker
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+  script:
+    - docker build --build-arg JAR_FILE=event-service.jar -t ${DOCKER_IMAGE_PREFIX}/event-service:${CI_COMMIT_REF_SLUG} ./event-service
+    - docker push ${DOCKER_IMAGE_PREFIX}/event-service:${CI_COMMIT_REF_SLUG}
+    - docker tag ${DOCKER_IMAGE_PREFIX}/event-service:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/event-service:latest
+    - docker push ${DOCKER_IMAGE_PREFIX}/event-service:latest
+  environment: production
+  needs:
+    - sonarqube-check
+
+deploy-ticket-service:
+  stage: deploy
+  image: docker:20.10
+  services:
+    - docker:dind
+  tags:
+    - docker
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+  script:
+    - docker build --build-arg JAR_FILE=ticket-service.jar -t ${DOCKER_IMAGE_PREFIX}/ticket-service:${CI_COMMIT_REF_SLUG} ./ticket-service
+    - docker push ${DOCKER_IMAGE_PREFIX}/ticket-service:${CI_COMMIT_REF_SLUG}
+    - docker tag ${DOCKER_IMAGE_PREFIX}/ticket-service:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/ticket-service:latest
+    - docker push ${DOCKER_IMAGE_PREFIX}/ticket-service:latest
+  environment: production
+  needs:
+    - sonarqube-check
+
+deploy-eureka-server:
+  stage: deploy
+  image: docker:20.10
+  services:
+    - docker:dind
+  tags:
+    - docker
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+  script:
+    - docker build --build-arg JAR_FILE=eureka-server.jar -t ${DOCKER_IMAGE_PREFIX}/eureka-server:${CI_COMMIT_REF_SLUG} ./discovery-service
+    - docker push ${DOCKER_IMAGE_PREFIX}/eureka-server:${CI_COMMIT_REF_SLUG}
+    - docker tag ${DOCKER_IMAGE_PREFIX}/eureka-server:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/eureka-server:latest
+    - docker push ${DOCKER_IMAGE_PREFIX}/eureka-server:latest
+  environment: production
+  needs:
+    - sonarqube-check

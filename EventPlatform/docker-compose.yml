@@ -1,0 +1,126 @@
+services:
+  eureka-server:
+    build:
+      context: ./discovery-service
+      dockerfile: Dockerfile
+    container_name: discovery-server
+    ports:
+      - "8761:8761"
+    networks:
+      - microservices-network
+
+  event-service:
+    build:
+      context: ./event-service
+      dockerfile: Dockerfile
+    container_name: event-service
+    ports:
+      - "8002:8002"
+    environment:
+      eureka.client.serviceUrl.defaultZone: http://eureka-server:8761/eureka
+      spring.data.mongodb.uri: mongodb://mongodb:27017/eventservice
+      spring.rabbitmq.host: rabbitmq
+    networks:
+      - microservices-network
+    depends_on:
+      - eureka-server
+      - mongodb
+      - rabbitmq
+  ticket-service:
+    build:
+      context: ./ticket-service
+      dockerfile: Dockerfile
+    container_name: ticket-service
+    ports:
+      - "8003:8003"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/ticketsdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      eureka.client.serviceUrl.defaultZone: http://eureka-server:8761/eureka
+      spring.rabbitmq.host: rabbitmq
+    networks:
+      - microservices-network
+    depends_on:
+      - eureka-server
+      - postgres
+      - rabbitmq
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      eureka.client.serviceUrl.defaultZone: http://eureka-server:8761/eureka
+    networks:
+      - microservices-network
+    depends_on:
+      - eureka-server
+      - event-service
+      - ticket-service
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    networks:
+      - microservices-network
+    ports:
+      - '5173:5173'
+
+  postgres:
+    image: postgres:15.3-alpine3.18
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5432:5432'
+    volumes: 
+      - ./db:/var/lib/postgresql/data
+      - ./create-db.sql:/docker-entrypoint-initdb.d/create_database.sql
+    networks:
+      - microservices-network
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    restart: always
+    ports:
+      - 27017:27017
+    networks:
+      - microservices-network
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    restart: always
+    ports:
+      - 5672:5672
+      - 15672:15672
+    networks:
+      - microservices-network
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "rabbitmq", "5672" ]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 30s
+
+configs:
+  rabbitmq-plugins:
+     content: "[rabbitmq_management]."
+
+networks:
+  microservices-network:
+    driver: bridge
+volumes:
+  rabbitmq-lib:
+    driver: local
+  rabbitmq-log:
+    driver: local
+  rabbitmq_data:
+  db-data:
