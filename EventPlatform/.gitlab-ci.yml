@@ -1,5 +1,6 @@
 stages:
   - build
+  - test
   - e2e_test
   - code_quality
   - deploy
@@ -97,47 +98,37 @@ build-eureka-server:
   artifacts:
     paths:
       - eureka-server.jar
-
-# E2E Test Job
-e2e-test:
+# E2E Test Job (Using ApigatewayApplicationTests.java)
+e2e-test-api-gateway:
   stage: e2e_test
   image: gradle:8.4.0-jdk17
   tags:
     - docker
-  services:
-    - name: docker:dind
-      alias: docker
   before_script:
     - chmod +x ./gradlew
+    - apk add --no-cache docker-cli docker-compose
     - export DOCKER_HOST=tcp://docker:2375
-    - RANDOM_SUFFIX=$(uuidgen | cut -c1-8)
-    - export RANDOM_SUFFIX
     - docker-compose -f docker-compose.yml up -d
-    - sleep 300
-    - echo "Checking container logs..."
-    - docker logs api-gateway_${RANDOM_SUFFIX} || true
-    - docker logs event-service_${RANDOM_SUFFIX} || true
-    - docker logs ticket-service_${RANDOM_SUFFIX} || true
-    - docker logs discovery-server_${RANDOM_SUFFIX} || true
-    - docker logs postgres_${RANDOM_SUFFIX} || true
-    - docker logs mongodb_${RANDOM_SUFFIX} || true
-    - docker logs rabbitmq_${RANDOM_SUFFIX} || true
+    - sleep 60
+    - docker logs apigateway || true
+    - docker logs eventservice || true
+    - docker logs ticketservice || true
+    - docker logs discoveryserver || true
   script:
-    - ./gradlew :event-service:e2eTest
-    - ./gradlew :ticket-service:e2eTest
+    - cd api-gateway
+    - ./gradlew test --tests "com.apigateway.ApigatewayApplicationTests"
   after_script:
-    - docker-compose -f docker-compose.yml down
+    - docker-compose -f ../docker-compose.yml down
   needs:
+    - build-api-gateway
     - build-event-service
     - build-ticket-service
-    - build-api-gateway
     - build-eureka-server
   variables:
     SPRING_PROFILES_ACTIVE: test
   artifacts:
     paths:
-      - event-service/build/test-results/e2eTest
-      - ticket-service/build/test-results/e2eTest
+      - api-gateway/build/test-results/test
     expire_in: 1 week
 
 # SonarQube Analysis
@@ -156,7 +147,7 @@ sonarqube-check:
     SONAR_HOST_URL: "https://sonarcloud.io"
     SONAR_LOGIN: "$SONAR_TOKEN"
   needs:
-    - e2e-test
+    - e2e-test-api-gateway
   only:
     - main
     - dev
