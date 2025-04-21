@@ -78,6 +78,7 @@ build-ticket-service:
     paths:
       - ticket-service.jar
 
+
 build-eureka-server:
   stage: build
   image: gradle:8.4.0-jdk17
