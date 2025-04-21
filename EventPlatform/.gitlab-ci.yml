@@ -100,6 +100,7 @@ build-eureka-server:
     paths:
       - eureka-server.jar
 # E2E Test Job (Using ApigatewayApplicationTests.java)
+
 e2e-test-api-gateway:
   stage: e2e_test
   image: gradle:8.4.0-jdk17
