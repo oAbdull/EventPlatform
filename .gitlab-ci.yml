@@ -105,11 +105,15 @@ e2e-test-api-gateway:
   tags:
     - docker
   services:
-    - docker:dind
+    - name: docker:dind
+      alias: docker
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+    SPRING_PROFILES_ACTIVE: test
   before_script:
     - apt-get update && apt-get install -y docker-compose
-    - export DOCKER_HOST=tcp://docker:2375
-    - docker-compose -f docker-compose.yml up -d
+    - docker info || echo "Docker info failed"
+    - docker-compose -f docker-compose.yml up -d --build
     - sleep 60
     - docker ps
     - echo "Checking container logs..."
@@ -122,74 +126,79 @@ e2e-test-api-gateway:
     - chmod +x ./gradlew
     - ./gradlew test --tests "com.apigateway.ApigatewayApplicationTests"
   after_script:
-    - |
-      echo "Stopping Docker Compose services..."
-      if [ -f docker-compose.yml ]; then
-        docker-compose -f docker-compose.yml down || echo "docker-compose down failed"
-      else
-        echo "docker-compose.yml not found"
-      fi
+    - echo "Skipping docker-compose down as frontend service is not needed for e2e tests"
   needs:
     - build-api-gateway
     - build-event-service
     - build-ticket-service
     - build-discovery-service
-  variables:
-    SPRING_PROFILES_ACTIVE: test
+
   artifacts:
     paths:
       - api-gateway/build/test-results/test
     expire_in: 1 week
 
-  # # SonarQube Analysis
-  # sonarqube-check:
-  #   stage: code_quality
-  #   image: gradle:8.4.0-jdk17
-  #   tags:
-  #     - docker
-  #   before_script:
-  #     - chmod +x ./gradlew
-  #   script:
-  #     - ./gradlew :api-gateway:build :event-service:build :ticket-service:build :discovery-service:build -x test
-  #     - export SONAR_TOKEN="$SONAR_TOKEN"
-  #     - ./gradlew sonar "-Dsonar.login=$SONAR_TOKEN"
-  #   variables:
-  #     SONAR_HOST_URL: "https://sonarcloud.io"
-  #     SONAR_LOGIN: "$SONAR_TOKEN"
-  #   needs:
-  #     - e2e-test-api-gateway
-  #   only:
-  #     - main
-  #     - dev
-  #     - master
-  #   allow_failure: true
-  # Deploy Jobs
+# SonarQube Analysis
+sonarqube-check:
+  stage: code_quality
+  image: gradle:8.4.0-jdk17
+  tags:
+    - docker
+  before_script:
+    - chmod +x ./gradlew
+  script:
+    - ./gradlew :api-gateway:build :event-service:build :ticket-service:build :discovery-service:build -x test
+    - export SONAR_TOKEN="$SONAR_TOKEN"
+    - ./gradlew sonar "-Dsonar.login=$SONAR_TOKEN"
+  variables:
+    SONAR_HOST_URL: "https://sonarcloud.io"
+    SONAR_LOGIN: "$SONAR_TOKEN"
+  needs:
+    - e2e-test-api-gateway
+  only:
+    - main
+    - dev
+    - master
+  allow_failure: true
 
-  # deploy-api-gateway:
-  #   stage: deploy
-  #   image: docker:20.10
-  #   services:
-  #     - docker:dind
-  #   variables:
-  #     DOCKER_HOST: tcp://docker:2375
-  #     DOCKER_TLS_CERTDIR: ""
-  #     SERVICE_NAME: apigateway
-  #   tags:
-  #     - docker
-  #   before_script:
-  #     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
-  #   script:
-  #     - docker info
-  #     - docker build -t "$DOCKER_IMAGE_PREFIX/$SERVICE_NAME:$CI_COMMIT_SHORT_SHA" ./$SERVICE_NAME
-  #     - docker push "$DOCKER_IMAGE_PREFIX/$SERVICE_NAME:$CI_COMMIT_SHORT_SHA"
-  #     - docker tag "$DOCKER_IMAGE_PREFIX/$SERVICE_NAME:$CI_COMMIT_SHORT_SHA" "$DOCKER_IMAGE_PREFIX/$SERVICE_NAME:latest"
-  #     - docker push "$DOCKER_IMAGE_PREFIX/$SERVICE_NAME:latest"
-  #   environment: production
-  #   needs:
-  #     - build-api-gateway
-  #   only:
-  #     changes:
-  #       - api-gateway/**
-
-  # needs:
-  #   - sonarqube-check
+# Deploy Jobs
+deploy-all:
+  stage: deploy
+  image: docker:20.10
+  services:
+    - name: docker:dind
+      alias: docker
+  variables:
+    DOCKER_TLS_CERTDIR: ""
+  tags:
+    - docker
+  before_script:
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+  script:
+    - docker info
+    - docker-compose -f docker-compose.yml build
+    - docker tag eventplatform-eureka-server "$DOCKER_USER/eventplatform:eureka-server-$CI_COMMIT_SHORT_SHA"
+    - docker tag eventplatform-event-service "$DOCKER_USER/eventplatform:event-service-$CI_COMMIT_SHORT_SHA"
+    - docker tag eventplatform-ticket-service "$DOCKER_USER/eventplatform:ticket-service-$CI_COMMIT_SHORT_SHA"
+    - docker tag eventplatform-api-gateway "$DOCKER_USER/eventplatform:api-gateway-$CI_COMMIT_SHORT_SHA"
+    - docker tag eventplatform-frontend "$DOCKER_USER/eventplatform:frontend-$CI_COMMIT_SHORT_SHA"
+    - docker push "$DOCKER_USER/eventplatform:eureka-server-$CI_COMMIT_SHORT_SHA"
+    - docker push "$DOCKER_USER/eventplatform:event-service-$CI_COMMIT_SHORT_SHA"
+    - docker push "$DOCKER_USER/eventplatform:ticket-service-$CI_COMMIT_SHORT_SHA"
+    - docker push "$DOCKER_USER/eventplatform:api-gateway-$CI_COMMIT_SHORT_SHA"
+    - docker push "$DOCKER_USER/eventplatform:frontend-$CI_COMMIT_SHORT_SHA"
+    - docker tag eventplatform-eureka-server "$DOCKER_USER/eventplatform:eureka-server-latest"
+    - docker tag eventplatform-event-service "$DOCKER_USER/eventplatform:event-service-latest"
+    - docker tag eventplatform-ticket-service "$DOCKER_USER/eventplatform:ticket-service-latest"
+    - docker tag eventplatform-api-gateway "$DOCKER_USER/eventplatform:api-gateway-latest"
+    - docker tag eventplatform-frontend "$DOCKER_USER/eventplatform:frontend-latest"
+    - docker push "$DOCKER_USER/eventplatform:eureka-server-latest"
+    - docker push "$DOCKER_USER/eventplatform:event-service-latest"
+    - docker push "$DOCKER_USER/eventplatform:ticket-service-latest"
+    - docker push "$DOCKER_USER/eventplatform:api-gateway-latest"
+    - docker push "$DOCKER_USER/eventplatform:frontend-latest"
+  environment: production
+  needs:
+    - sonarqube-check
+  only:
+    - main
