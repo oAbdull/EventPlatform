@@ -98,140 +98,98 @@ build-discovery-service:
     paths:
       - discovery-service.jar
 
-# # E2E Test Job
-# e2e-test-api-gateway:
-#   stage: e2e_test
-#   image: gradle:8.4.0-jdk17
-#   tags:
-#     - docker
-
-#   before_script:
-#     - chmod +x ./gradlew
-#     - export DOCKER_HOST=tcp://docker:2375
-#     - docker-compose -f docker-compose.yml up -d
-#     - sleep 60
-#     - echo "Checking container logs..."
-#     - docker logs api-gateway || true
-#     - docker logs event-service || true
-#     - docker logs ticket-service || true
-#     - docker logs discovery-server || true
-#   script:
-#     - cd api-gateway
-#     - ./gradlew test --tests "com.apigateway.ApigatewayApplicationTests"
-#   after_script:
-#     - docker-compose -f ../docker-compose.yml down
-#   needs:
-#     - build-api-gateway
-#     - build-event-service
-#     - build-ticket-service
-#     - build-eureka-server
-#   variables:
-#     SPRING_PROFILES_ACTIVE: test
-#   artifacts:
-#     paths:
-#       - api-gateway/build/test-results/test
-#     expire_in: 1 week
-
-
-# # SonarQube Analysis
-# sonarqube-check:
-#   stage: code_quality
-#   image: gradle:8.4.0-jdk17
-#   tags:
-#     - docker
-#   before_script:
-#     - chmod +x ./gradlew
-#   script:
-#     - ./gradlew :api-gateway:build :event-service:build :ticket-service:build :discovery-service:build -x test
-#     - export SONAR_TOKEN="$SONAR_TOKEN"
-#     - ./gradlew sonar "-Dsonar.login=$SONAR_TOKEN"
-#   variables:
-#     SONAR_HOST_URL: "https://sonarcloud.io"
-#     SONAR_LOGIN: "$SONAR_TOKEN"
-#   needs:
-#     - e2e-test-api-gateway
-#   only:
-#     - main
-#     - dev
-#     - master
-#   allow_failure: true
-# Deploy Jobs
-
-deploy-api-gateway:
-  stage: deploy
-  image: docker:20.10
-  services:
-    - docker:dind
+# E2E Test Job
+e2e-test-api-gateway:
+  stage: e2e_test
+  image: gradle:8.4.0-jdk17
   tags:
     - docker
-  before_script:
-    - export DOCKER_CONFIG="$CI_PROJECT_DIR/.docker"
-    - mkdir -p "$DOCKER_CONFIG"
-    - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"$DOCKER_USER\",\"password\":\"$DOCKER_PASSWORD\"}}}" > "$DOCKER_CONFIG/config.json"
-  script:
-    # Debug the prefix to ensure it's clean
-    - echo "DOCKER_IMAGE_PREFIX='$DOCKER_IMAGE_PREFIX'"
-    - echo "Tag to be used: ${DOCKER_IMAGE_PREFIX}/apigateway:${CI_COMMIT_REF_SLUG}"
-    # Build and push
-    - docker build --build-arg JAR_FILE=api-gateway.jar -t "${DOCKER_IMAGE_PREFIX}/apigateway:${CI_COMMIT_REF_SLUG}" ./api-gateway
-    - docker push "${DOCKER_IMAGE_PREFIX}/apigateway:${CI_COMMIT_REF_SLUG}"
-    - docker tag "${DOCKER_IMAGE_PREFIX}/apigateway:${CI_COMMIT_REF_SLUG}" "${DOCKER_IMAGE_PREFIX}/apigateway:latest"
-    - docker push "${DOCKER_IMAGE_PREFIX}/apigateway:latest"
-  environment: production
-
-
-deploy-event-service:
-  stage: deploy
-  image: docker:20.10
   services:
     - docker:dind
-  tags:
-    - docker
   before_script:
-    - export DOCKER_CONFIG="$CI_PROJECT_DIR/.docker"
-    - mkdir -p "$DOCKER_CONFIG"
-    - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"$DOCKER_USER\",\"password\":\"$DOCKER_PASSWORD\"}}}" > "$DOCKER_CONFIG/config.json"
+    - apt-get update && apt-get install -y docker-compose
+    - export DOCKER_HOST=tcp://docker:2375
+    - docker-compose -f docker-compose.yml up -d
+    - sleep 60
+    - docker ps
+    - echo "Checking container logs..."
+    - docker logs api-gateway || true
+    - docker logs event-service || true
+    - docker logs ticket-service || true
+    - docker logs discovery-server || true
   script:
-    - docker build --build-arg JAR_FILE=event-service.jar -t ${DOCKER_IMAGE_PREFIX}/eventservice:${CI_COMMIT_REF_SLUG} ./event-service
-    - docker push ${DOCKER_IMAGE_PREFIX}/eventservice:${CI_COMMIT_REF_SLUG}
-    - docker tag ${DOCKER_IMAGE_PREFIX}/eventservice:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/eventservice:latest
-    - docker push ${DOCKER_IMAGE_PREFIX}/eventservice:latest
-  environment: production
+    - cd api-gateway
+    - chmod +x ./gradlew
+    - ./gradlew test --tests "com.apigateway.ApigatewayApplicationTests"
+  after_script:
+    - |
+      echo "Stopping Docker Compose services..."
+      if [ -f docker-compose.yml ]; then
+        docker-compose -f docker-compose.yml down || echo "docker-compose down failed"
+      else
+        echo "docker-compose.yml not found"
+      fi
+  needs:
+    - build-api-gateway
+    - build-event-service
+    - build-ticket-service
+    - build-discovery-service
+  variables:
+    SPRING_PROFILES_ACTIVE: test
+  artifacts:
+    paths:
+      - api-gateway/build/test-results/test
+    expire_in: 1 week
 
-deploy-ticket-service:
-  stage: deploy
-  image: docker:20.10
-  services:
-    - docker:dind
-  tags:
-    - docker
-  before_script:
-    - export DOCKER_CONFIG="$CI_PROJECT_DIR/.docker"
-    - mkdir -p "$DOCKER_CONFIG"
-    - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"$DOCKER_USER\",\"password\":\"$DOCKER_PASSWORD\"}}}" > "$DOCKER_CONFIG/config.json"
-  script:
-    - docker build --build-arg JAR_FILE=ticket-service.jar -t ${DOCKER_IMAGE_PREFIX}/ticketservice:${CI_COMMIT_REF_SLUG} ./ticket-service
-    - docker push ${DOCKER_IMAGE_PREFIX}/ticketservice:${CI_COMMIT_REF_SLUG}
-    - docker tag ${DOCKER_IMAGE_PREFIX}/ticketservice:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/ticketservice:latest
-    - docker push ${DOCKER_IMAGE_PREFIX}/ticketservice:latest
-  environment: production
+  # # SonarQube Analysis
+  # sonarqube-check:
+  #   stage: code_quality
+  #   image: gradle:8.4.0-jdk17
+  #   tags:
+  #     - docker
+  #   before_script:
+  #     - chmod +x ./gradlew
+  #   script:
+  #     - ./gradlew :api-gateway:build :event-service:build :ticket-service:build :discovery-service:build -x test
+  #     - export SONAR_TOKEN="$SONAR_TOKEN"
+  #     - ./gradlew sonar "-Dsonar.login=$SONAR_TOKEN"
+  #   variables:
+  #     SONAR_HOST_URL: "https://sonarcloud.io"
+  #     SONAR_LOGIN: "$SONAR_TOKEN"
+  #   needs:
+  #     - e2e-test-api-gateway
+  #   only:
+  #     - main
+  #     - dev
+  #     - master
+  #   allow_failure: true
+  # Deploy Jobs
 
-deploy-discovery-service:
-  stage: deploy
-  image: docker:20.10
-  services:
-    - docker:dind
-  tags:
-    - docker
-  before_script:
-    - export DOCKER_CONFIG="$CI_PROJECT_DIR/.docker"
-    - mkdir -p "$DOCKER_CONFIG"
-    - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"$DOCKER_USER\",\"password\":\"$DOCKER_PASSWORD\"}}}" > "$DOCKER_CONFIG/config.json"
-  script:
-    - docker build --build-arg JAR_FILE=discovery-service.jar -t ${DOCKER_IMAGE_PREFIX}/discoveryservice:${CI_COMMIT_REF_SLUG} ./discovery-service
-    - docker push ${DOCKER_IMAGE_PREFIX}/discoveryservice:${CI_COMMIT_REF_SLUG}
-    - docker tag ${DOCKER_IMAGE_PREFIX}/discoveryservice:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/discoveryservice:latest
-    - docker push ${DOCKER_IMAGE_PREFIX}/discoveryservice:latest
-  environment: production
+  # deploy-api-gateway:
+  #   stage: deploy
+  #   image: docker:20.10
+  #   services:
+  #     - docker:dind
+  #   variables:
+  #     DOCKER_HOST: tcp://docker:2375
+  #     DOCKER_TLS_CERTDIR: ""
+  #     SERVICE_NAME: apigateway
+  #   tags:
+  #     - docker
+  #   before_script:
+  #     - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+  #   script:
+  #     - docker info
+  #     - docker build -t "$DOCKER_IMAGE_PREFIX/$SERVICE_NAME:$CI_COMMIT_SHORT_SHA" ./$SERVICE_NAME
+  #     - docker push "$DOCKER_IMAGE_PREFIX/$SERVICE_NAME:$CI_COMMIT_SHORT_SHA"
+  #     - docker tag "$DOCKER_IMAGE_PREFIX/$SERVICE_NAME:$CI_COMMIT_SHORT_SHA" "$DOCKER_IMAGE_PREFIX/$SERVICE_NAME:latest"
+  #     - docker push "$DOCKER_IMAGE_PREFIX/$SERVICE_NAME:latest"
+  #   environment: production
+  #   needs:
+  #     - build-api-gateway
+  #   only:
+  #     changes:
+  #       - api-gateway/**
+
   # needs:
   #   - sonarqube-check
