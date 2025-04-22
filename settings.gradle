@@ -1,8 +1,0 @@
-rootProject.name = 'BackEnd'
-
-include 'Apigateway'
-include 'EventService'
-include 'UserService'
-include 'TicketService'
-include 'DiscoveryService'
-

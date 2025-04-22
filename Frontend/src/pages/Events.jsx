@@ -19,7 +19,7 @@ const Events = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log(event);
-        axios.post("http://localhost:8002/api/events", event, {
+        axios.post("/api/events", event, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem("access_token")}`,
                 },
@@ -42,7 +42,7 @@ const Events = () => {
     }
 
     const loadData = () => {
-        axios.get("http://localhost:8002/api/events", {
+        axios.get("/api/events", {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },

@@ -3,11 +3,12 @@ import { useEffect } from "react";
 
 const Profile = () => {
     const { user, isAuthenticated, isLoading, getAccessTokenSilently} = useAuth0();
-    //console.log(user);
+    console.log(user);
     useEffect(() => {
         const getAccessToken = async () => {
             const token = await getAccessTokenSilently();
             localStorage.setItem("access_token", token);
+            localStorage.setItem("user_id", user.email);
         };
         getAccessToken();
     },[]);
@@ -18,7 +19,7 @@ const Profile = () => {
     return (
         isAuthenticated && (
             <div>
-              <h4>Role: {user['app/roles']!="ADMIN" ? "USER":"ADMIN"}</h4>
+              <h4>Role: {user['app/roles']!="admin" ? "USER":"ADMIN"}</h4>
               <h2>{user.name}</h2>
               <p>{user.email}</p>
             </div>

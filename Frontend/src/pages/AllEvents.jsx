@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 const AllEvents = () => {
     const [events,setevents]=useState([]);
     const loadData = () => {
-        axios.get("http://localhost:8002/api/events", {
+        axios.get("/api/events", {
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("access_token")}`,
             },
@@ -15,6 +15,26 @@ const AllEvents = () => {
         })
         .catch((error) => {
             console.error("There was an error fetching the events!", error);
+        });
+    }
+
+    const bookTicket = (eventId) => {
+        axios.post(`/api/tickets`, {
+            userid: localStorage.getItem("user_id"),
+            eventid: eventId,
+            bookingTime: new Date().toISOString(),
+        }, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("access_token")}`,
+            },
+        })
+        .then((response) => {
+            console.log(response.data);
+            alert("Ticket booked successfully!");
+        })
+        .catch((error) => {
+            console.error("There was an error booking the ticket!", error);
+            alert("Failed to book ticket. Please try again.");
         });
     }
     
@@ -46,7 +66,7 @@ const AllEvents = () => {
                                     <td>{event.date}</td>
                                     <td>{event.price}</td>
                                     <td>{event.location}</td>
-                                    <td><button className="btn btn-primary btn-sm">Book Now</button></td>
+                                    <td><button className="btn btn-primary btn-sm" onClick={e=>bookTicket(event.id)}>Book Now</button></td>
                                 </tr>
                             ))}
                     </tbody>

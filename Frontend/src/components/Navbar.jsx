@@ -16,17 +16,14 @@ const Navbar = () => {
                         <li className="nav-item">
                             <Link className="nav-link active" aria-current="page" to="/profile">Profile</Link>
                         </li>
-                        {isAuthenticated && user['app/roles'] == "ADMIN" ? (
+                        {isAuthenticated && user['app/roles'] == "admin" ? (
                             <>
                             <li className="nav-item">
                                 <Link className="nav-link" to="/events">Events</Link>
                             </li>
                             <li className="nav-item">
-                                <Link className="nav-link">Reports</Link>
+                                <Link className="nav-link" to="/report">Reports</Link>
                             </li>
-                            <li className="nav-item">
-                            <Link className="nav-link" to="/bookings">Bookings</Link>
-                        </li>
                         </>
                         ):(
                             <>

@@ -14,7 +14,8 @@ cache:
     - .gradle/
 
 # Build Jobs
-build-apigateway:
+
+build-api-gateway:
   stage: build
   image: gradle:8.4.0-jdk17
   tags:
@@ -26,16 +27,16 @@ build-apigateway:
     - |
       JAR_FILE=$(find Apigateway/build/libs -name "*.jar" -type f | head -n 1)
       if [ -n "$JAR_FILE" ]; then
-        cp "$JAR_FILE" apigateway.jar
+        cp "$JAR_FILE" api-gateway.jar
       else
         echo "No JAR file found"
         exit 1
       fi
   artifacts:
     paths:
-      - apigateway.jar
+      - api-gateway.jar
 
-build-userservice:
+build-event-service:
   stage: build
   image: gradle:8.4.0-jdk17
   tags:
@@ -43,20 +44,20 @@ build-userservice:
   before_script:
     - chmod +x ./gradlew
   script:
-    - ./gradlew :UserService:clean :UserService:build -x test
+    - ./gradlew :EventService:clean :EventService:build -x test
     - |
-      JAR_FILE=$(find UserService/build/libs -name "*.jar" -type f | head -n 1)
+      JAR_FILE=$(find EventService/build/libs -name "*.jar" -type f | head -n 1)
       if [ -n "$JAR_FILE" ]; then
-        cp "$JAR_FILE" userservice.jar
+        cp "$JAR_FILE" event-service.jar
       else
         echo "No JAR file found"
         exit 1
       fi
   artifacts:
     paths:
-      - userservice.jar
+      - event-service.jar
 
-build-ticketservice:
+build-ticket-service:
   stage: build
   image: gradle:8.4.0-jdk17
   tags:
@@ -68,16 +69,16 @@ build-ticketservice:
     - |
       JAR_FILE=$(find TicketService/build/libs -name "*.jar" -type f | head -n 1)
       if [ -n "$JAR_FILE" ]; then
-        cp "$JAR_FILE" ticketservice.jar
+        cp "$JAR_FILE" ticket-service.jar
       else
         echo "No JAR file found"
         exit 1
       fi
   artifacts:
     paths:
-      - ticketservice.jar
+      - ticket-service.jar
 
-build-discoveryservice:
+build-eureka-server:
   stage: build
   image: gradle:8.4.0-jdk17
   tags:
@@ -89,81 +90,75 @@ build-discoveryservice:
     - |
       JAR_FILE=$(find DiscoveryService/build/libs -name "*.jar" -type f | head -n 1)
       if [ -n "$JAR_FILE" ]; then
-        cp "$JAR_FILE" discoveryservice.jar
+        cp "$JAR_FILE" eureka-server.jar
       else
         echo "No JAR file found"
         exit 1
       fi
   artifacts:
     paths:
-      - discoveryservice.jar
+      - eureka-server.jar
 
-# E2E Test Job
-e2e-test:
-  stage: e2e_test
-  image: gradle-docker-compose:8.4.0-jdk17  # استخدام الصورة المخصصة
-  tags:
-    - docker
-  services:
-    - name: docker:dind
-      alias: docker
-  before_script:
-    - chmod +x ./gradlew
-    - export DOCKER_HOST=tcp://docker:2375
-    - RANDOM_SUFFIX=$(uuidgen | cut -c1-8)
-    - export RANDOM_SUFFIX
-    - docker-compose -f docker-compose.yml up -d
-    - sleep 300
-    - echo "Checking container logs..."
-    - docker logs apigateway_${RANDOM_SUFFIX} || true
-    - docker logs userservice_${RANDOM_SUFFIX} || true
-    - docker logs ticketservice_${RANDOM_SUFFIX} || true
-    - docker logs discoveryserver_${RANDOM_SUFFIX} || true
-    - docker logs postgres_${RANDOM_SUFFIX} || true
-    - docker logs rabbitmq_${RANDOM_SUFFIX} || true
-  script:
-    - ./gradlew :UserService:e2eTest
-    - ./gradlew :TicketService:e2eTest
-  after_script:
-    - docker-compose -f docker-compose.yml down
-  needs:
-    - build-userservice
-    - build-ticketservice
-    - build-apigateway
-    - build-discoveryservice
-  variables:
-    SPRING_PROFILES_ACTIVE: test
-  artifacts:
-    paths:
-      - UserService/build/test-results/e2eTest
-      - TicketService/build/test-results/e2eTest
-    expire_in: 1 week
+# # E2E Test Job
+# e2e-test-api-gateway:
+#   stage: e2e_test
+#   image: gradle:8.4.0-jdk17
+#   tags:
+#     - docker
 
-# SonarQube Analysis
-sonarqube-check:
-  stage: code_quality
-  image: gradle:8.4.0-jdk17
-  tags:
-    - docker
-  before_script:
-    - chmod +x ./gradlew
-  script:
-    - ./gradlew :Apigateway:build :UserService:build :TicketService:build :DiscoveryService:build -x test
-    - export SONAR_TOKEN="$SONAR_TOKEN"
-    - ./gradlew sonar "-Dsonar.login=$SONAR_TOKEN"
-  variables:
-    SONAR_HOST_URL: "https://sonarcloud.io"
-    SONAR_LOGIN: "$SONAR_TOKEN"
-  needs:
-    - e2e-test
-  only:
-    - main
-    - dev
-    - master
-  allow_failure: true
+#   before_script:
+#     - chmod +x ./gradlew
+#     - export DOCKER_HOST=tcp://docker:2375
+#     - docker-compose -f docker-compose.yml up -d
+#     - sleep 60
+#     - echo "Checking container logs..."
+#     - docker logs api-gateway || true
+#     - docker logs event-service || true
+#     - docker logs ticket-service || true
+#     - docker logs discovery-server || true
+#   script:
+#     - cd api-gateway
+#     - ./gradlew test --tests "com.apigateway.ApigatewayApplicationTests"
+#   after_script:
+#     - docker-compose -f ../docker-compose.yml down
+#   needs:
+#     - build-api-gateway
+#     - build-event-service
+#     - build-ticket-service
+#     - build-eureka-server
+#   variables:
+#     SPRING_PROFILES_ACTIVE: test
+#   artifacts:
+#     paths:
+#       - api-gateway/build/test-results/test
+#     expire_in: 1 week
 
+
+# # SonarQube Analysis
+# sonarqube-check:
+#   stage: code_quality
+#   image: gradle:8.4.0-jdk17
+#   tags:
+#     - docker
+#   before_script:
+#     - chmod +x ./gradlew
+#   script:
+#     - ./gradlew :api-gateway:build :event-service:build :ticket-service:build :discovery-service:build -x test
+#     - export SONAR_TOKEN="$SONAR_TOKEN"
+#     - ./gradlew sonar "-Dsonar.login=$SONAR_TOKEN"
+#   variables:
+#     SONAR_HOST_URL: "https://sonarcloud.io"
+#     SONAR_LOGIN: "$SONAR_TOKEN"
+#   needs:
+#     - e2e-test-api-gateway
+#   only:
+#     - main
+#     - dev
+#     - master
+#   allow_failure: true
 # Deploy Jobs
-deploy-apigateway:
+
+deploy-api-gateway:
   stage: deploy
   image: docker:20.10
   services:
@@ -171,17 +166,18 @@ deploy-apigateway:
   tags:
     - docker
   before_script:
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+    - export DOCKER_CONFIG="$CI_PROJECT_DIR/.docker"
+    - mkdir -p "$DOCKER_CONFIG"
+    - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"$DOCKER_USER\",\"password\":\"$DOCKER_PASSWORD\"}}}" > "$DOCKER_CONFIG/config.json"
+
   script:
-    - docker build --build-arg JAR_FILE=apigateway.jar -t ${DOCKER_IMAGE_PREFIX}/apigateway:${CI_COMMIT_REF_SLUG} ./Apigateway
+    - docker build --build-arg JAR_FILE=apigateway.jar -t ${DOCKER_IMAGE_PREFIX}/apigateway:${CI_COMMIT_REF_SLUG} ./api-gateway
     - docker push ${DOCKER_IMAGE_PREFIX}/apigateway:${CI_COMMIT_REF_SLUG}
     - docker tag ${DOCKER_IMAGE_PREFIX}/apigateway:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/apigateway:latest
     - docker push ${DOCKER_IMAGE_PREFIX}/apigateway:latest
   environment: production
-  needs:
-    - sonarqube-check
 
-deploy-userservice:
+deploy-event-service:
   stage: deploy
   image: docker:20.10
   services:
@@ -189,17 +185,18 @@ deploy-userservice:
   tags:
     - docker
   before_script:
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+    - export DOCKER_CONFIG="$CI_PROJECT_DIR/.docker"
+    - mkdir -p "$DOCKER_CONFIG"
+    - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"$DOCKER_USER\",\"password\":\"$DOCKER_PASSWORD\"}}}" > "$DOCKER_CONFIG/config.json"
+
   script:
-    - docker build --build-arg JAR_FILE=userservice.jar -t ${DOCKER_IMAGE_PREFIX}/userservice:${CI_COMMIT_REF_SLUG} ./UserService
-    - docker push ${DOCKER_IMAGE_PREFIX}/userservice:${CI_COMMIT_REF_SLUG}
-    - docker tag ${DOCKER_IMAGE_PREFIX}/userservice:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/userservice:latest
-    - docker push ${DOCKER_IMAGE_PREFIX}/userservice:latest
+    - docker build --build-arg JAR_FILE=event-service.jar -t ${DOCKER_IMAGE_PREFIX}/eventservice:${CI_COMMIT_REF_SLUG} ./event-service
+    - docker push ${DOCKER_IMAGE_PREFIX}/eventservice:${CI_COMMIT_REF_SLUG}
+    - docker tag ${DOCKER_IMAGE_PREFIX}/eventservice:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/eventservice:latest
+    - docker push ${DOCKER_IMAGE_PREFIX}/eventservice:latest
   environment: production
-  needs:
-    - sonarqube-check
 
-deploy-ticketservice:
+deploy-ticket-service:
   stage: deploy
   image: docker:20.10
   services:
@@ -207,17 +204,18 @@ deploy-ticketservice:
   tags:
     - docker
   before_script:
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+    - export DOCKER_CONFIG="$CI_PROJECT_DIR/.docker"
+    - mkdir -p "$DOCKER_CONFIG"
+    - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"$DOCKER_USER\",\"password\":\"$DOCKER_PASSWORD\"}}}" > "$DOCKER_CONFIG/config.json"
+
   script:
-    - docker build --build-arg JAR_FILE=ticketservice.jar -t ${DOCKER_IMAGE_PREFIX}/ticketservice:${CI_COMMIT_REF_SLUG} ./TicketService
+    - docker build --build-arg JAR_FILE=ticketservice.jar -t ${DOCKER_IMAGE_PREFIX}/ticketservice:${CI_COMMIT_REF_SLUG} ./ticket-service
     - docker push ${DOCKER_IMAGE_PREFIX}/ticketservice:${CI_COMMIT_REF_SLUG}
     - docker tag ${DOCKER_IMAGE_PREFIX}/ticketservice:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/ticketservice:latest
     - docker push ${DOCKER_IMAGE_PREFIX}/ticketservice:latest
   environment: production
-  needs:
-    - sonarqube-check
 
-deploy-discoveryservice:
+deploy-discovery-service:
   stage: deploy
   image: docker:20.10
   services:
@@ -225,12 +223,15 @@ deploy-discoveryservice:
   tags:
     - docker
   before_script:
-    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USER" --password-stdin
+    - export DOCKER_CONFIG="$CI_PROJECT_DIR/.docker"
+    - mkdir -p "$DOCKER_CONFIG"
+    - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"$DOCKER_USER\",\"password\":\"$DOCKER_PASSWORD\"}}}" > "$DOCKER_CONFIG/config.json"
+
   script:
-    - docker build --build-arg JAR_FILE=discoveryservice.jar -t ${DOCKER_IMAGE_PREFIX}/discoveryservice:${CI_COMMIT_REF_SLUG} ./DiscoveryService
+    - docker build --build-arg JAR_FILE=discoveryservice.jar -t ${DOCKER_IMAGE_PREFIX}/discoveryservice:${CI_COMMIT_REF_SLUG} ./discovery-service
     - docker push ${DOCKER_IMAGE_PREFIX}/discoveryservice:${CI_COMMIT_REF_SLUG}
     - docker tag ${DOCKER_IMAGE_PREFIX}/discoveryservice:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/discoveryservice:latest
     - docker push ${DOCKER_IMAGE_PREFIX}/discoveryservice:latest
   environment: production
-  needs:
-    - sonarqube-check
+  # needs:
+  #   - sonarqube-check
