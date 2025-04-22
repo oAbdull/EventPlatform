@@ -23,14 +23,16 @@ build-api-gateway:
   before_script:
     - chmod +x ./gradlew
   script:
-    - ./gradlew :Apigateway:clean :Apigateway:build -x test
-    - |
-      JAR_FILE=$(find Apigateway/build/libs -name "*.jar" -type f | head -n 1)
+    - cd api-gateway
+      - chmod +x ./gradlew
+      - ./gradlew clean build -x test
+      - |
+      JAR_FILE=$(find build/libs -name "*.jar" -type f | head -n 1)
       if [ -n "$JAR_FILE" ]; then
-        cp "$JAR_FILE" api-gateway.jar
+      cp "$JAR_FILE" ../api-gateway.jar
       else
-        echo "No JAR file found"
-        exit 1
+      echo "No JAR file found"
+      exit 1
       fi
   artifacts:
     paths:
