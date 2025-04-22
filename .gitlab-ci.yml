@@ -13,7 +13,6 @@ cache:
   paths:
     - .gradle/
 
-
 # Build Jobs
 build-api-gateway:
   stage: build
@@ -170,11 +169,16 @@ deploy-api-gateway:
     - mkdir -p "$DOCKER_CONFIG"
     - echo "{\"auths\":{\"https://index.docker.io/v1/\":{\"username\":\"$DOCKER_USER\",\"password\":\"$DOCKER_PASSWORD\"}}}" > "$DOCKER_CONFIG/config.json"
   script:
-    - docker build --build-arg JAR_FILE=api-gateway.jar -t ${DOCKER_IMAGE_PREFIX}/apigateway:${CI_COMMIT_REF_SLUG} ./api-gateway
-    - docker push ${DOCKER_IMAGE_PREFIX}/apigateway:${CI_COMMIT_REF_SLUG}
-    - docker tag ${DOCKER_IMAGE_PREFIX}/apigateway:${CI_COMMIT_REF_SLUG} ${DOCKER_IMAGE_PREFIX}/apigateway:latest
-    - docker push ${DOCKER_IMAGE_PREFIX}/apigateway:latest
+    # Debug the prefix to ensure it's clean
+    - echo "DOCKER_IMAGE_PREFIX='$DOCKER_IMAGE_PREFIX'"
+    - echo "Tag to be used: ${DOCKER_IMAGE_PREFIX}/apigateway:${CI_COMMIT_REF_SLUG}"
+    # Build and push
+    - docker build --build-arg JAR_FILE=api-gateway.jar -t "${DOCKER_IMAGE_PREFIX}/apigateway:${CI_COMMIT_REF_SLUG}" ./api-gateway
+    - docker push "${DOCKER_IMAGE_PREFIX}/apigateway:${CI_COMMIT_REF_SLUG}"
+    - docker tag "${DOCKER_IMAGE_PREFIX}/apigateway:${CI_COMMIT_REF_SLUG}" "${DOCKER_IMAGE_PREFIX}/apigateway:latest"
+    - docker push "${DOCKER_IMAGE_PREFIX}/apigateway:latest"
   environment: production
+
 
 deploy-event-service:
   stage: deploy
