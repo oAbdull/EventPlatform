@@ -13,8 +13,8 @@ cache:
   paths:
     - .gradle/
 
-# Build Jobs
 
+# Build Jobs
 build-api-gateway:
   stage: build
   image: gradle:8.4.0-jdk17
@@ -35,7 +35,6 @@ build-api-gateway:
   artifacts:
     paths:
       - api-gateway.jar
-
 
 build-event-service:
   stage: build
