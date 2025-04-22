@@ -20,23 +20,22 @@ build-api-gateway:
   image: gradle:8.4.0-jdk17
   tags:
     - docker
-  before_script:
-    - chmod +x ./gradlew
   script:
     - cd api-gateway
-      - chmod +x ./gradlew
-      - ./gradlew clean build -x test
-      - |
+    - chmod +x ./gradlew
+    - ./gradlew clean build -x test
+    - |
       JAR_FILE=$(find build/libs -name "*.jar" -type f | head -n 1)
       if [ -n "$JAR_FILE" ]; then
-      cp "$JAR_FILE" ../api-gateway.jar
+        cp "$JAR_FILE" ../api-gateway.jar
       else
-      echo "No JAR file found"
-      exit 1
+        echo "No JAR file found"
+        exit 1
       fi
   artifacts:
     paths:
       - api-gateway.jar
+
 
 build-event-service:
   stage: build
