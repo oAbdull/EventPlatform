@@ -2,7 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/EventPlatform.iml" filepath="$PROJECT_DIR$/.idea/EventPlatform.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/event-service/EventPlatform.event-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/event-service/EventPlatform.event-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ticket-service/EventPlatform.ticket-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ticket-service/EventPlatform.ticket-service.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/eventservice.main.iml" filepath="$PROJECT_DIR$/.idea/modules/eventservice.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/ticketservice.main.iml" filepath="$PROJECT_DIR$/.idea/modules/ticketservice.main.iml" />
     </modules>

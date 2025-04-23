@@ -1,0 +1,3 @@
+rootProject.name = 'EventPlatform'
+include 'api-gateway', 'discovery-service', 'event-service', 'ticket-service'
+

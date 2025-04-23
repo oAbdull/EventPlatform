@@ -34,6 +34,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	compileOnly 'org.projectlombok:lombok'
 	runtimeOnly 'org.postgresql:postgresql'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -41,20 +42,22 @@ dependencies {
 	testImplementation 'org.springframework.amqp:spring-rabbit-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
+
 sonar {
 	properties {
 		property "sonar.projectKey", "eventplatform"
 		property "sonar.organization", "eventplatform"
 		property "sonar.host.url", "https://sonarcloud.io"
-		property "sonar.login", System.getenv("SONAR_TOKEN")
+		property "sonar.token", System.getenv("SONAR_TOKEN")
 	}
-	dependencyManagement {
-		imports {
-			mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-		}
-	}
+}
 
-	tasks.named('test') {
-		useJUnitPlatform()
+dependencyManagement {
+	imports {
+		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
 	}
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
 }
