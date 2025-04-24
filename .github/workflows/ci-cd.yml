@@ -43,7 +43,7 @@ jobs:
  
       - name: Build and push API Gataway
         run: |
-          docker build -t okbaabdullah92082/eventplatform/api-gateway:${{ github.sha }} ./api-gateway
+          docker build -t okbaabdullah92082/eventplatform-api-gateway:${{ github.sha }} ./api-gateway
           docker tag okbaabdullah92082/eventplatform-api-gateway:${{ github.sha }} okbaabdullah92082/eventplatform-api-gateway:latest
           docker push okbaabdullah92082/eventplatform-api-gateway:${{ github.sha }}
           docker push okbaabdullah92082/eventplatform-api-gateway:latest
