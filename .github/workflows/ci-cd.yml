@@ -30,6 +30,9 @@ jobs:
         working-directory: ./api-gateway
         run: chmod +x ./gradlew
 
+      - name: Build API Gateway
+        working-directory: ./api-gateway
+        run: ./gradlew build -x test
       
  
       - name: Login to Docker Hub
