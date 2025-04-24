@@ -27,11 +27,11 @@ jobs:
           restore-keys: ${{ runner.os }}-gradle
  
       - name: Grant execute permission for Gradle wrapper
-        working-directory: EventPlatform/api-gateway
+        working-directory: ./api-gateway
         run: chmod +x ./gradlew
 
       - name: Build API Gateway
-        working-directory: EventPlatform/api-gateway
+        working-directory: ./api-gateway
         run: ./gradlew clean build
  
       - name: Login to Docker Hub
@@ -42,7 +42,7 @@ jobs:
  
       - name: Build and push API Gataway
         run: |
-          docker build -t okbaabdullah92082/eventplatform/api-gateway:${{ github.sha }} EventPlatform/api-gateway
+          docker build -t okbaabdullah92082/eventplatform/api-gateway:${{ github.sha }} ./api-gateway
           docker tag okbaabdullah92082/eventplatform-api-gateway:${{ github.sha }} okbaabdullah92082/eventplatform-api-gateway:latest
           docker push okbaabdullah92082/eventplatform-api-gateway:${{ github.sha }}
           docker push okbaabdullah92082/eventplatform-api-gateway:latest
