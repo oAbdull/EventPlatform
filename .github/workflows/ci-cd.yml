@@ -37,11 +37,11 @@ jobs:
 
       # --- Build Event Service ---
       - name: Grant execute permission for Gradle wrapper (Event Service)
-        working-directory: ./eventservice
+        working-directory: ./event-service
         run: chmod +x ./gradlew
 
       - name: Build Event Service
-        working-directory: ./eventservice
+        working-directory: ./event-service
         run: ./gradlew build -x test
 
       # --- Build Discovery Service ---
@@ -80,10 +80,10 @@ jobs:
       # --- Push Event Service ---
       - name: Build and push Event Service
         run: |
-          docker build -t okbaabdullah92082/eventplatform-eventservice:${{ github.sha }} ./eventservice
-          docker tag okbaabdullah92082/eventplatform-eventservice:${{ github.sha }} okbaabdullah92082/eventplatform-eventservice:latest
-          docker push okbaabdullah92082/eventplatform-eventservice:${{ github.sha }}
-          docker push okbaabdullah92082/eventplatform-eventservice:latest
+          docker build -t okbaabdullah92082/eventplatform-event-service:${{ github.sha }} ./event-service
+          docker tag okbaabdullah92082/eventplatform-event-service:${{ github.sha }} okbaabdullah92082/eventplatform-event-service:latest
+          docker push okbaabdullah92082/eventplatform-event-service:${{ github.sha }}
+          docker push okbaabdullah92082/eventplatform-event-service:latest
 
       # --- Push Discovery Service ---
       - name: Build and push Discovery Service
