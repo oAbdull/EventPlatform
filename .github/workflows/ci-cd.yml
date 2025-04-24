@@ -26,6 +26,7 @@ jobs:
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
           restore-keys: ${{ runner.os }}-gradle
 
+      # --- Build API Gateway ---
       - name: Grant execute permission for Gradle wrapper (API Gateway)
         working-directory: ./api-gateway
         run: chmod +x ./gradlew
@@ -34,20 +35,41 @@ jobs:
         working-directory: ./api-gateway
         run: ./gradlew build -x test
 
+      # --- Build Event Service ---
       - name: Grant execute permission for Gradle wrapper (Event Service)
-        working-directory: ./event-service
+        working-directory: ./eventservice
         run: chmod +x ./gradlew
 
       - name: Build Event Service
-        working-directory: ./event-service
+        working-directory: ./eventservice
         run: ./gradlew build -x test
 
+      # --- Build Discovery Service ---
+      - name: Grant execute permission for Gradle wrapper (Discovery Service)
+        working-directory: ./discovery-service
+        run: chmod +x ./gradlew
+
+      - name: Build Discovery Service
+        working-directory: ./discovery-service
+        run: ./gradlew build -x test
+
+      # --- Build Ticket Service ---
+      - name: Grant execute permission for Gradle wrapper (Ticket Service)
+        working-directory: ./ticket-service
+        run: chmod +x ./gradlew
+
+      - name: Build Ticket Service
+        working-directory: ./ticket-service
+        run: ./gradlew build -x test
+
+      # --- Docker login ---
       - name: Login to Docker Hub
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
+      # --- Push API Gateway ---
       - name: Build and push API Gateway
         run: |
           docker build -t okbaabdullah92082/eventplatform-api-gateway:${{ github.sha }} ./api-gateway
@@ -55,9 +77,26 @@ jobs:
           docker push okbaabdullah92082/eventplatform-api-gateway:${{ github.sha }}
           docker push okbaabdullah92082/eventplatform-api-gateway:latest
 
+      # --- Push Event Service ---
       - name: Build and push Event Service
         run: |
-          docker build -t okbaabdullah92082/eventplatform-event-service:${{ github.sha }} ./event-service
-          docker tag okbaabdullah92082/eventplatform-event-service:${{ github.sha }} okbaabdullah92082/eventplatform-event-service:latest
-          docker push okbaabdullah92082/eventplatform-event-service:${{ github.sha }}
-          docker push okbaabdullah92082/eventplatform-event-service:latest
+          docker build -t okbaabdullah92082/eventplatform-eventservice:${{ github.sha }} ./eventservice
+          docker tag okbaabdullah92082/eventplatform-eventservice:${{ github.sha }} okbaabdullah92082/eventplatform-eventservice:latest
+          docker push okbaabdullah92082/eventplatform-eventservice:${{ github.sha }}
+          docker push okbaabdullah92082/eventplatform-eventservice:latest
+
+      # --- Push Discovery Service ---
+      - name: Build and push Discovery Service
+        run: |
+          docker build -t okbaabdullah92082/eventplatform-discovery-service:${{ github.sha }} ./discovery-service
+          docker tag okbaabdullah92082/eventplatform-discovery-service:${{ github.sha }} okbaabdullah92082/eventplatform-discovery-service:latest
+          docker push okbaabdullah92082/eventplatform-discovery-service:${{ github.sha }}
+          docker push okbaabdullah92082/eventplatform-discovery-service:latest
+
+      # --- Push Ticket Service ---
+      - name: Build and push Ticket Service
+        run: |
+          docker build -t okbaabdullah92082/eventplatform-ticket-service:${{ github.sha }} ./ticket-service
+          docker tag okbaabdullah92082/eventplatform-ticket-service:${{ github.sha }} okbaabdullah92082/eventplatform-ticket-service:latest
+          docker push okbaabdullah92082/eventplatform-ticket-service:${{ github.sha }}
+          docker push okbaabdullah92082/eventplatform-ticket-service:latest
