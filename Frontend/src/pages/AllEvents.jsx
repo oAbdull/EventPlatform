@@ -51,11 +51,11 @@ const AllEvents = () => {
                 <table className="table table-bordered table-striped">
                     <thead>
                         <tr className="bg-gray-100">
+                            <th className="py-2 px-4 border-b">Event ID</th>
                             <th className="py-2 px-4 border-b">Event Name</th>
                             <th className="py-2 px-4 border-b">Date</th>
                             <th className="py-2 px-4 border-b">Price</th>
                             <th className="py-2 px-4 border-b">Location</th>
-                            <th className="py-2 px-4 border-b">Actions</th>
                         </tr>
                     </thead>
                     <tbody>

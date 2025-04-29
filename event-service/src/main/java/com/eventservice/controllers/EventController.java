@@ -31,7 +31,7 @@ public class EventController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getEventById(String id) {
+    public ResponseEntity<?> getEventById(@PathVariable String id) {
         Event event = eventService.findById(id);
         if (event != null) {
             return ResponseEntity.ok(event);
@@ -41,7 +41,7 @@ public class EventController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteEventById(String id) {
+    public ResponseEntity<?> deleteEventById(@PathVariable String id) {
         Event event = eventService.findById(id);
         if (event != null) {
             eventService.deleteById(id);

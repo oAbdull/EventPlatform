@@ -91,7 +91,14 @@ class ApigatewayApplicationTests {
 				.post(OAUTH_URL)
 				.jsonPath().getString("access_token");
 
-
+		given()
+				.header("Authorization", "Bearer " + accessToken)
+				.contentType(ContentType.JSON)
+				.when()
+				.delete("/api/events/1")
+				.then()
+				.statusCode(200)
+				.body(containsString("Event deleted successfully"));
 	}
 
 	@Test
