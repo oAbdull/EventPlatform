@@ -100,3 +100,4 @@ jobs:
           docker tag okbaabdullah92082/eventplatform-ticket-service:${{ github.sha }} okbaabdullah92082/eventplatform-ticket-service:latest
           docker push okbaabdullah92082/eventplatform-ticket-service:${{ github.sha }}
           docker push okbaabdullah92082/eventplatform-ticket-service:latest
+
