@@ -1,1 +1,57 @@
 
+# .github/workflows/playwright.yml
+
+name: Playwright E2E Tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  playwright-test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./e2e-tests # Set default directory for subsequent steps
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20 # Use Node.js 20.x
+
+    - name: Install dependencies
+      run: npm ci # Use ci for faster, reliable installs in CI
+
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps # Install browsers and dependencies
+
+    - name: Run Playwright tests
+      # IMPORTANT: This step assumes the full EventPlatform stack
+      # (API Gateway, services, databases, etc.) is running and accessible
+      # at the baseURL configured in playwright.config.ts (e.g., http://localhost:8080).
+      # In a real CI/CD pipeline, you would typically have preceding steps
+      # to build Docker images, deploy the application (e.g., using docker-compose),
+      # and wait for it to be ready before running these E2E tests.
+      run: npm test
+
+    - name: Upload Playwright report
+      uses: actions/upload-artifact@v4
+      if: always() # Upload report even if tests fail
+      with:
+        name: playwright-report
+        path: e2e-tests/playwright-report/ # Path relative to repository root
+        retention-days: 30
+
